@@ -10,6 +10,7 @@ import {
     extractLeadText
 } from './clean';
 import { formatPubDate } from './dates';
+import { isLikelyEnglish } from './language';
 
 type CustomItem = {
     'content:encoded'?: string;
@@ -57,13 +58,26 @@ export type CleanedItem = {
 
 export { formatPubDate } from './dates';
 
+function filterEnglishOnlyItems(
+    items: CleanedItem[],
+    englishOnly: boolean,
+): CleanedItem[] {
+    if (!englishOnly) return items;
+    return items.filter(item => {
+        const sample = `${item.title} ${item.description ?? ''}`;
+        return isLikelyEnglish(sample);
+    });
+}
+
 export async function fetchAndCleanFeed(
     feedUrl: string,
     options: CleanOptions,
-    sourceName?: string
+    sourceName?: string,
+    englishOnly = false
 ): Promise<CleanedFeed> {
     if (isNewsBreakFeedUrl(feedUrl)) {
-        return fetchAndCleanNewsBreakFeed(feedUrl, options, sourceName);
+        const feed = await fetchAndCleanNewsBreakFeed(feedUrl, options, sourceName);
+        return { ...feed, items: filterEnglishOnlyItems(feed.items, englishOnly) };
     }
 
     const parsed = await parser.parseURL(feedUrl);
@@ -123,7 +137,7 @@ export async function fetchAndCleanFeed(
         title: parsed.title ?? 'Cleaned feed',
         link: cleanUrl(parsed.link, options.removeTrackingParams),
         description: cleanText(parsed.description, options),
-        items
+        items: filterEnglishOnlyItems(items, englishOnly),
     };
 }
 

@@ -47,7 +47,7 @@ For full-bleed background images with readable text overlay, use a **Website/iFr
 
 `https://your-app.vercel.app/display?seconds=14`
 
-Stories rotate every 14 seconds (change with `?seconds=5` through `120`). The page reloads every 5 minutes to pick up fresh headlines.
+Stories rotate every 14 seconds (change with `?seconds=5` through `120`). The page reloads every 5 minutes to pick up fresh headlines. The blue progress strip is off by default; add `&progress=true` to enable it.
 
 **Why does text still look cropped?** Content is limited in three places:
 

@@ -4,7 +4,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { DisplayStory } from '@/lib/display/items';
 import './display.css';
 
-const showProgress = false;
 function formatRelativeTime(pubDate?: string): string {
     if (!pubDate) return '';
     const ms = Date.parse(pubDate);
@@ -22,9 +21,10 @@ function formatRelativeTime(pubDate?: string): string {
 type Props = {
     stories: DisplayStory[];
     intervalSeconds: number;
+    showProgress: boolean;
 };
 
-export default function DisplayPlayer({ stories, intervalSeconds }: Props) {
+export default function DisplayPlayer({ stories, intervalSeconds, showProgress }: Props) {
     const [index, setIndex] = useState(0);
     const [progress, setProgress] = useState(0);
     const [brokenImages, setBrokenImages] = useState<Set<number>>(new Set());
@@ -35,26 +35,36 @@ export default function DisplayPlayer({ stories, intervalSeconds }: Props) {
     }, [stories]);
 
     const advance = useCallback(() => {
-        setProgress(0);
         setIndex(i => (playable.length ? (i + 1) % playable.length : 0));
     }, [playable.length]);
 
     useEffect(() => {
         if (playable.length <= 1) return;
-        const tickMs = 100;
-        const totalMs = intervalSeconds * 1000;
-        const id = window.setInterval(() => {
-            setProgress(p => {
-                const next = p + tickMs / totalMs;
-                if (next >= 1) {
-                    advance();
-                    return 0;
-                }
-                return next;
-            });
-        }, tickMs);
+
+        if (showProgress) {
+            const tickMs = 100;
+            const totalMs = intervalSeconds * 1000;
+            const id = window.setInterval(() => {
+                setProgress(p => {
+                    const next = p + tickMs / totalMs;
+                    if (next >= 1) {
+                        advance();
+                        return 0;
+                    }
+                    return next;
+                });
+            }, tickMs);
+            return () => clearInterval(id);
+        }
+
+        const id = window.setInterval(advance, intervalSeconds * 1000);
         return () => clearInterval(id);
-    }, [advance, intervalSeconds, playable.length, index]);
+    }, [advance, intervalSeconds, playable.length, showProgress]);
+
+    useEffect(() => {
+        if (!showProgress) return;
+        setProgress(0);
+    }, [index, showProgress]);
 
     useEffect(() => {
         const refreshMs = 5 * 60 * 1000;

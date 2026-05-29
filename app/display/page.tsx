@@ -11,16 +11,27 @@ export const dynamic = "force-dynamic";
 export const revalidate = 300;
 
 type PageProps = {
-  searchParams: Promise<{ seconds?: string }>;
+  searchParams: Promise<{ seconds?: string; progress?: string }>;
 };
+
+function flag(value: string | undefined): boolean {
+  return value === "1" || value === "true";
+}
 
 export default async function DisplayPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const parsed = Number(params.seconds);
   const intervalSeconds =
     Number.isFinite(parsed) && parsed >= 5 && parsed <= 120 ? parsed : 14;
+  const showProgress = flag(params.progress);
 
   const stories = await getDisplayStories(30);
 
-  return <DisplayPlayer stories={stories} intervalSeconds={intervalSeconds} />;
+  return (
+    <DisplayPlayer
+      stories={stories}
+      intervalSeconds={intervalSeconds}
+      showProgress={showProgress}
+    />
+  );
 }

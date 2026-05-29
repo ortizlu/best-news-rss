@@ -21,12 +21,14 @@ export async function serveCleanedRss(
   searchParams: URLSearchParams,
   sourceName?: string,
   presets?: Partial<CleanOptions>,
+  englishOnly = false,
 ): Promise<NextResponse> {
   const options = resolveCleanOptions(searchParams, presets);
   const cleaned = await fetchAndCleanFeed(
     sourceUrl,
     options,
     sourceName ?? channelTitle,
+    englishOnly,
   );
   const xml = buildRssXml({ ...cleaned, title: channelTitle }, selfLink);
   return rssResponse(xml);

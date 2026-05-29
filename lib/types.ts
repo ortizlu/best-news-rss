@@ -18,6 +18,8 @@ export type FeedSource = {
   id: string;
   name: string;
   url: string;
+  /** Drop items that look Spanish (e.g. WTOP syndicates Spanish wire copy). */
+  englishOnly?: boolean;
 };
 
 export type FeedsConfig = {

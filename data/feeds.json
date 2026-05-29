@@ -28,7 +28,8 @@
         {
             "id": "wtop",
             "name": "WTOP",
-            "url": "https://wtop.com/feed/"
+            "url": "https://wtop.com/feed/",
+            "englishOnly": true
         },
         {
             "id": "newsbreak-groveton",

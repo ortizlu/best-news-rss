@@ -20,7 +20,12 @@ export async function fetchAndMergeFeeds(
 ): Promise<CleanedFeed> {
   const results = await Promise.allSettled(
     sources.map((source) =>
-      fetchAndCleanFeed(source.url, options, source.name),
+      fetchAndCleanFeed(
+        source.url,
+        options,
+        source.name,
+        source.englishOnly ?? false,
+      ),
     ),
   );
 

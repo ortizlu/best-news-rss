@@ -23,6 +23,8 @@ export async function GET(request: NextRequest, { params }: Params) {
       request.nextUrl.href,
       request.nextUrl.searchParams,
       source.name,
+      undefined,
+      source.englishOnly ?? false,
     );
   } catch (err) {
     const message =

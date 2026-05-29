@@ -118,31 +118,37 @@ function decodeEntities(text: string): string {
 const WIRE_SERVICES =
   "AP|Associated Press|The Associated Press|Reuters|AFP|Bloomberg|PA Media";
 
-/** Remove wire datelines and bylines, e.g. "KINSHASA, Congo (AP) — ". */
+/** Matches "(AP) —" style tails after a city/dateline prefix. */
+const WIRE_DATELINE_TAIL = new RegExp(
+  String.raw`\s*\(\s*(?:${WIRE_SERVICES})\s*\)\s*(?:-|–|—)\s*`,
+  "iu",
+);
+
+/** Remove wire datelines and bylines, e.g. "KINSHASA, Congo (AP) — " or "SAN FRANCISCO (AP) — ". */
 export function stripWireAttribution(text: string): string {
-  const wire = new RegExp(WIRE_SERVICES, "i");
   let t = text.trim();
+
+  // Broadest: up to ~100 chars before (AP) — at the start (ALL CAPS or mixed).
+  t = t.replace(
+    new RegExp(String.raw`^.{0,100}?${WIRE_DATELINE_TAIL.source}`, "iu"),
+    "",
+  );
 
   // CITY, Country (AP) — …
   t = t.replace(
     new RegExp(
-      `^[\\p{Lu}\\d][\\p{L}\\s.,'\\u2019-]*?\\s*\\(\\s*(?:${WIRE_SERVICES})\\s*\\)\\s*[\\u2014\\u2013-]\\s*`,
+      String.raw`^[\p{Lu}\d][\p{L}\s.,'\u2019-]*?${WIRE_DATELINE_TAIL.source}`,
       "iu",
     ),
     "",
   );
 
   // (AP) — …
-  if (wire.test(t)) {
-    t = t.replace(
-      new RegExp(`^\\s*\\(\\s*(?:${WIRE_SERVICES})\\s*\\)\\s*[\\u2014\\u2013-]\\s*`, "iu"),
-      "",
-    );
-  }
+  t = t.replace(WIRE_DATELINE_TAIL, "");
 
   // By Jane Doe — …
   t = t.replace(
-    /^[Bb]y\s+[A-Z][\p{L}'-]+(?:\s+[A-Z][\p{L}'-]+){0,3}\s*[\u2014\u2013-]\s*/u,
+    /^[Bb]y\s+[A-Z][\p{L}'-]+(?:\s+[A-Z][\p{L}'-]+){0,3}\s*(?:-|–|—)\s*/u,
     "",
   );
 
@@ -248,10 +254,12 @@ export function extractArticleText(
     text = options.stripHtml ? stripHtml(raw) : raw.trim();
   }
 
-  text = text
-    .replace(/\s*Read more on [^:]+:\s*.*$/i, "")
-    .replace(/\s+Read\s+More\b[\s\S]*$/i, "")
-    .trim();
+  text = stripWireAttribution(
+    text
+      .replace(/\s*Read more on [^:]+:\s*.*$/i, "")
+      .replace(/\s+Read\s+More\b[\s\S]*$/i, "")
+      .trim(),
+  );
 
   if (!options.includeImages) {
     text = stripBareUrls(text);
