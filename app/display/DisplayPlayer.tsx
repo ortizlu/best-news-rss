@@ -74,6 +74,7 @@ export default function DisplayPlayer({ stories, intervalSeconds, showProgress }
     const [brokenImages, setBrokenImages] = useState<Set<number>>(new Set());
     const [descriptionText, setDescriptionText] = useState<string | undefined>();
     const textStackRef = useRef<HTMLDivElement>(null);
+    const contentRef = useRef<HTMLDivElement>(null);
     const metaRef = useRef<HTMLDivElement>(null);
     const titleRef = useRef<HTMLHeadingElement>(null);
     const descriptionRef = useRef<HTMLParagraphElement>(null);
@@ -124,24 +125,27 @@ export default function DisplayPlayer({ stories, intervalSeconds, showProgress }
             return;
         }
 
+        setDescriptionText(undefined);
+
+        const container = contentRef.current;
         const stack = textStackRef.current;
         const meta = metaRef.current;
         const title = titleRef.current;
         const desc = descriptionRef.current;
-        if (!stack || !desc) return;
+        if (!container || !stack || !desc) return;
 
         const measure = () => {
-            const next = fitDescriptionText(stack, meta, title, desc, full);
+            const next = fitDescriptionText(container, meta, title, desc, full);
             setDescriptionText(prev => (prev === next ? prev : next));
         };
 
         measure();
         const raf = requestAnimationFrame(measure);
         const ro = new ResizeObserver(measure);
+        ro.observe(container);
         ro.observe(stack);
         if (meta) ro.observe(meta);
         if (title) ro.observe(title);
-        ro.observe(desc);
         window.addEventListener('resize', measure);
         return () => {
             cancelAnimationFrame(raf);
@@ -200,7 +204,7 @@ export default function DisplayPlayer({ stories, intervalSeconds, showProgress }
                             />
                         )}
                         {showImage && <div className="display-overlay" />}
-                        <div className="display-content">
+                        <div className="display-content" ref={i === index ? contentRef : undefined}>
                             {story.link ? (
                                 <a
                                     className="display-article-link"

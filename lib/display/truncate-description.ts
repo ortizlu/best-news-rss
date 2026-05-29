@@ -10,16 +10,16 @@ function marginBottom(el: HTMLElement): number {
   return parseFloat(getComputedStyle(el).marginBottom) || 0;
 }
 
-/** Vertical space left for the description after meta + title. */
+/** Vertical space for description from the fixed widget container (not the text stack). */
 export function availableDescriptionHeight(
-  stack: HTMLElement,
+  container: HTMLElement,
   meta: HTMLElement | null,
   title: HTMLElement | null,
 ): number {
   let used = 0;
   if (meta) used += meta.offsetHeight + marginBottom(meta);
   if (title) used += title.offsetHeight + marginBottom(title);
-  return Math.max(0, stack.clientHeight - used);
+  return Math.max(0, container.clientHeight - used);
 }
 
 function caretAt(el: HTMLElement, x: number, y: number): Range | null {
@@ -68,7 +68,7 @@ export function lastVisibleLineIsPartial(el: HTMLElement): boolean {
   return box.bottom > rect.bottom + 1;
 }
 
-function setText(el: HTMLElement, text: string): boolean {
+function fitsInBox(el: HTMLElement, text: string): boolean {
   el.textContent = text;
   return el.scrollHeight <= el.clientHeight + 2;
 }
@@ -80,11 +80,19 @@ function trimWordBoundary(text: string): string {
   return t;
 }
 
+function applyMeasureHeight(
+  desc: HTMLElement,
+  available: number,
+): void {
+  if (available > 0) {
+    desc.style.maxHeight = `${available}px`;
+  } else {
+    desc.style.removeProperty("max-height");
+  }
+}
+
 /** Longest prefix that fits without a partial bottom line. */
-function truncateToCleanEnd(
-  el: HTMLElement,
-  fullText: string,
-): string {
+function truncateToCleanEnd(el: HTMLElement, fullText: string): string {
   let lo = 0;
   let hi = fullText.length;
   let best = 0;
@@ -104,14 +112,12 @@ function truncateToCleanEnd(
   }
 
   if (best >= fullText.length) return fullText;
+  if (best === 0) return "";
   return fullText.slice(0, best).trimEnd();
 }
 
-/** Shorter prefix + ellipsis when the next line would be partial. */
-function truncateWithEllipsis(
-  el: HTMLElement,
-  fullText: string,
-): string {
+/** Prefix + ellipsis when the next line would be partial. */
+function truncateWithEllipsis(el: HTMLElement, fullText: string): string {
   let lo = 0;
   let hi = fullText.length;
   let best = 0;
@@ -119,7 +125,7 @@ function truncateWithEllipsis(
   while (lo <= hi) {
     const mid = Math.floor((lo + hi) / 2);
     const candidate = trimWordBoundary(fullText.slice(0, mid)) + ELLIPSIS;
-    if (setText(el, candidate)) {
+    if (fitsInBox(el, candidate)) {
       best = mid;
       lo = mid + 1;
     } else {
@@ -127,8 +133,26 @@ function truncateWithEllipsis(
     }
   }
 
-  if (best === 0) return ELLIPSIS;
-  return trimWordBoundary(fullText.slice(0, best)) + ELLIPSIS;
+  if (best > 0) {
+    return trimWordBoundary(fullText.slice(0, best)) + ELLIPSIS;
+  }
+
+  // Tight box: fit as many characters as possible before the ellipsis.
+  lo = 1;
+  hi = fullText.length;
+  best = 0;
+  while (lo <= hi) {
+    const mid = Math.floor((lo + hi) / 2);
+    if (fitsInBox(el, fullText.slice(0, mid) + ELLIPSIS)) {
+      best = mid;
+      lo = mid + 1;
+    } else {
+      hi = mid - 1;
+    }
+  }
+
+  if (best > 0) return fullText.slice(0, best).trimEnd() + ELLIPSIS;
+  return fitsInBox(el, fullText) ? fullText : fullText.slice(0, 120).trimEnd() + ELLIPSIS;
 }
 
 /**
@@ -136,14 +160,14 @@ function truncateWithEllipsis(
  * clipped line at the bottom. Clean paragraph endings keep no ellipsis.
  */
 export function fitDescriptionText(
-  stack: HTMLElement,
+  container: HTMLElement,
   meta: HTMLElement | null,
   title: HTMLElement | null,
   desc: HTMLElement,
   fullText: string,
 ): string {
-  const available = availableDescriptionHeight(stack, meta, title);
-  desc.style.maxHeight = available > 0 ? `${available}px` : "";
+  const available = availableDescriptionHeight(container, meta, title);
+  applyMeasureHeight(desc, available);
 
   desc.textContent = fullText;
   if (desc.scrollHeight <= desc.clientHeight + 2) {
@@ -151,7 +175,8 @@ export function fitDescriptionText(
   }
 
   if (!lastVisibleLineIsPartial(desc)) {
-    return truncateToCleanEnd(desc, fullText);
+    const clean = truncateToCleanEnd(desc, fullText);
+    return clean || truncateWithEllipsis(desc, fullText);
   }
 
   return truncateWithEllipsis(desc, fullText);
