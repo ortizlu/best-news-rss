@@ -123,7 +123,8 @@
     .display-title {
         -webkit-line-clamp: 2;
         font-size: clamp(24px, 22cqh, 52px);
-        margin-bottom: 1.6cqh;
+        padding-bottom: 3.6cqh;
+        padding-top: 1cqh;
     }
 
     .display-description {
@@ -138,7 +139,8 @@
     .display-title {
         -webkit-line-clamp: 2;
         font-size: clamp(20px, 21cqh, 40px);
-        margin-bottom: 1cqh;
+        padding-bottom: 2.6cqh;
+        padding-top: 0.5cqh;
     }
 
     .display-description {
