@@ -111,17 +111,15 @@ export default function DisplayPlayer({ stories, intervalSeconds }: Props) {
             )}
             <div className="display-overlay" />
             <div className="display-content">
-              <div className="display-text-panel">
-                <div className="display-meta">
-                  {[story.source, formatRelativeTime(story.pubDate)]
-                    .filter(Boolean)
-                    .join("  ·  ")}
-                </div>
-                <h1 className="display-title">{story.title}</h1>
-                {story.description && (
-                  <p className="display-description">{story.description}</p>
-                )}
+              <div className="display-meta">
+                {[story.source, formatRelativeTime(story.pubDate)]
+                  .filter(Boolean)
+                  .join("  ·  ")}
               </div>
+              <h1 className="display-title">{story.title}</h1>
+              {story.description && (
+                <p className="display-description">{story.description}</p>
+              )}
             </div>
           </article>
         );

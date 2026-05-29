@@ -87,15 +87,26 @@ function stripBareUrls(text: string): string {
 }
 
 function decodeEntities(text: string): string {
-  return text
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&#8230;/g, "…")
-    .replace(/&hellip;/g, "…");
+  let out = text;
+  for (let pass = 0; pass < 3; pass++) {
+    out = out
+      .replace(/&amp;/g, "&")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/&apos;/g, "'")
+      .replace(/&nbsp;/g, " ")
+      .replace(/&#8230;/g, "…")
+      .replace(/&hellip;/g, "…")
+      .replace(/&#(\d+);/g, (_, n) =>
+        String.fromCharCode(Number(n)),
+      )
+      .replace(/&#x([0-9a-f]+);/gi, (_, hex) =>
+        String.fromCharCode(parseInt(hex, 16)),
+      );
+  }
+  return out;
 }
 
 const WIRE_SERVICES =

@@ -25,6 +25,7 @@ export async function getDisplayStories(maxItems = 30): Promise<DisplayStory[]> 
     ...DEFAULT_CLEAN_OPTIONS,
     includeItemLinks: true,
     includeImages: true,
+    maxDescriptionLength: 220,
   };
 
   const merged = await fetchAndMergeFeeds(feeds, options, maxItems);
