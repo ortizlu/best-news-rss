@@ -12,6 +12,7 @@ import {
 import { formatPubDate } from './dates';
 import { isLikelyEnglish } from './language';
 import { isLowValueStory } from './junk';
+import { isSportsArticle } from './sports';
 
 type CustomItem = {
     'content:encoded'?: string;
@@ -95,9 +96,14 @@ function resolveItemHtmlBody(item: RssItem, options: CleanOptions): string | und
     });
 }
 
-function filterFeedItems(items: CleanedItem[], englishOnly: boolean): CleanedItem[] {
+function filterFeedItems(
+    items: CleanedItem[],
+    englishOnly: boolean,
+    excludeSports = false,
+): CleanedItem[] {
     return items.filter(item => {
         if (isLowValueStory(item.title, item.description)) return false;
+        if (excludeSports && isSportsArticle(item.link)) return false;
         if (!englishOnly) return true;
         const sample = `${item.title} ${item.description ?? ''}`;
         return isLikelyEnglish(sample);
@@ -108,16 +114,21 @@ export async function fetchAndCleanFeed(
     feedUrl: string,
     options: CleanOptions,
     sourceName?: string,
-    englishOnly = false
+    englishOnly = false,
+    excludeSports = false,
 ): Promise<CleanedFeed> {
+    const dropSports = excludeSports || options.excludeSports === true;
+
     if (isNewsBreakFeedUrl(feedUrl)) {
         const feed = await fetchAndCleanNewsBreakFeed(feedUrl, options, sourceName);
-        return { ...feed, items: filterFeedItems(feed.items, englishOnly) };
+        return { ...feed, items: filterFeedItems(feed.items, englishOnly, dropSports) };
     }
 
     const parsed = await parser.parseURL(feedUrl);
 
-    const items: CleanedItem[] = (parsed.items ?? []).map(item => {
+    const items: CleanedItem[] = (parsed.items ?? [])
+        .filter(item => !dropSports || !isSportsArticle(item.link, item.categories))
+        .map(item => {
         const htmlBody = resolveItemHtmlBody(item, options);
         const plainSnippet = item.contentSnippet;
 
@@ -172,7 +183,7 @@ export async function fetchAndCleanFeed(
         title: parsed.title ?? 'Cleaned feed',
         link: cleanUrl(parsed.link, options.removeTrackingParams),
         description: cleanText(parsed.description, options),
-        items: filterFeedItems(items, englishOnly),
+        items: filterFeedItems(items, englishOnly, dropSports),
     };
 }
 

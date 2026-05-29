@@ -12,6 +12,8 @@ export type CleanOptions = {
   includeImages: boolean;
   /** How many HTML &lt;p&gt; blocks to include. 1 = lead paragraph only (default). */
   maxParagraphs: number;
+  /** Drop sports-section items (URL path / RSS category). */
+  excludeSports?: boolean;
 };
 
 export type FeedSource = {
@@ -20,6 +22,8 @@ export type FeedSource = {
   url: string;
   /** Drop items that look Spanish (e.g. WTOP syndicates Spanish wire copy). */
   englishOnly?: boolean;
+  /** Drop sports-section items from this source. */
+  excludeSports?: boolean;
 };
 
 export type FeedsConfig = {

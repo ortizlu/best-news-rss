@@ -25,6 +25,7 @@ export async function fetchAndMergeFeeds(
         options,
         source.name,
         source.englishOnly ?? false,
+        source.excludeSports ?? false,
       ),
     ),
   );

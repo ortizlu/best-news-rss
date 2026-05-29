@@ -3,6 +3,7 @@ import type { CleanedFeed, CleanedItem } from '../rss/fetch';
 import { formatPubDate } from '../rss/dates';
 import { cleanText, extractLeadText } from '../rss/clean';
 import { isLowValueStory } from '../rss/junk';
+import { isSportsArticle } from '../rss/sports';
 
 type NewsBreakFeedItem = {
     docid: string;
@@ -73,6 +74,8 @@ export async function fetchAndCleanNewsBreakFeed(
 
     const channelTitle = sourceName ?? page.title ?? `NewsBreak · ${slug.replace(/-/g, ' ')}`;
 
+    const dropSports = options.excludeSports === true;
+
     const items: CleanedItem[] = page.feed
         .filter(item => item.title && item.docid)
         .map(item => {
@@ -91,7 +94,8 @@ export async function fetchAndCleanNewsBreakFeed(
                 source: publisher || channelTitle
             };
         })
-        .filter(item => !isLowValueStory(item.title, item.description));
+        .filter(item => !isLowValueStory(item.title, item.description))
+        .filter(item => !dropSports || !isSportsArticle(item.link));
 
     return {
         title: channelTitle,

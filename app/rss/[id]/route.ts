@@ -25,6 +25,7 @@ export async function GET(request: NextRequest, { params }: Params) {
       source.name,
       undefined,
       source.englishOnly ?? false,
+      source.excludeSports ?? false,
     );
   } catch (err) {
     const message =

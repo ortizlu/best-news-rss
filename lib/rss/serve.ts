@@ -22,6 +22,7 @@ export async function serveCleanedRss(
   sourceName?: string,
   presets?: Partial<CleanOptions>,
   englishOnly = false,
+  excludeSports = false,
 ): Promise<NextResponse> {
   const options = resolveCleanOptions(searchParams, presets);
   const cleaned = await fetchAndCleanFeed(
@@ -29,6 +30,7 @@ export async function serveCleanedRss(
     options,
     sourceName ?? channelTitle,
     englishOnly,
+    excludeSports,
   );
   const xml = buildRssXml({ ...cleaned, title: channelTitle }, selfLink);
   return rssResponse(xml);

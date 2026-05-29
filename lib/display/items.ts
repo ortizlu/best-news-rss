@@ -28,7 +28,8 @@ export async function getDisplayStories(maxItems = 30): Promise<DisplayStory[]> 
         includeImages: true,
         maxDescriptionLength: 1000,
         maxParagraphs: 8,
-        dropFullContent: false
+        dropFullContent: false,
+        excludeSports: true,
     };
 
     const merged = await fetchAndMergeFeeds(feeds, options, maxItems);
