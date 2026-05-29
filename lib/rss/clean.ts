@@ -26,6 +26,7 @@ export const DEFAULT_CLEAN_OPTIONS: CleanOptions = {
   dropCategories: true,
   includeItemLinks: false,
   includeImages: false,
+  maxParagraphs: 1,
 };
 
 export function parseCleanOptions(
@@ -38,12 +39,17 @@ export function parseCleanOptions(
   };
 
   const max = Number(searchParams.get("maxDescriptionLength"));
+  const maxPara = Number(searchParams.get("maxParagraphs"));
   return {
     stripHtml: bool("stripHtml", DEFAULT_CLEAN_OPTIONS.stripHtml),
     maxDescriptionLength:
       Number.isFinite(max) && max > 0
         ? max
         : DEFAULT_CLEAN_OPTIONS.maxDescriptionLength,
+    maxParagraphs:
+      Number.isFinite(maxPara) && maxPara > 0
+        ? Math.min(maxPara, 20)
+        : DEFAULT_CLEAN_OPTIONS.maxParagraphs,
     removeTrackingParams: bool(
       "removeTracking",
       DEFAULT_CLEAN_OPTIONS.removeTrackingParams,
@@ -214,6 +220,46 @@ export function stripHtml(html: string): string {
   return decodeEntities(lines.join("\n"));
 }
 
+function truncateToMax(text: string, options: CleanOptions): string {
+  if (text.length <= options.maxDescriptionLength) return text;
+  return text.slice(0, options.maxDescriptionLength).trimEnd() + "…";
+}
+
+/** Multiple paragraphs from HTML (for display / full-text mode). */
+export function extractArticleText(
+  raw: string | undefined,
+  options: CleanOptions,
+): string | undefined {
+  if (!raw) return undefined;
+
+  const limit = Math.max(1, options.maxParagraphs);
+  let text: string;
+
+  if (raw.includes("<")) {
+    const parts: string[] = [];
+    for (const match of raw.matchAll(/<p[^>]*>([\s\S]*?)<\/p>/gi)) {
+      const para = stripWireAttribution(stripHtml(match[1] ?? ""));
+      if (isBoilerplateParagraph(para)) continue;
+      parts.push(para);
+      if (parts.length >= limit) break;
+    }
+    text = parts.length > 0 ? parts.join("\n\n") : stripHtml(raw);
+  } else {
+    text = options.stripHtml ? stripHtml(raw) : raw.trim();
+  }
+
+  text = text
+    .replace(/\s*Read more on [^:]+:\s*.*$/i, "")
+    .replace(/\s+Read\s+More\b[\s\S]*$/i, "")
+    .trim();
+
+  if (!options.includeImages) {
+    text = stripBareUrls(text);
+  }
+
+  return truncateToMax(text, options) || undefined;
+}
+
 /** Plain-text lead for RSS &lt;description&gt; (one short paragraph). */
 export function extractLeadText(
   raw: string | undefined,
@@ -228,11 +274,7 @@ export function extractLeadText(
     text = stripBareUrls(text);
   }
 
-  if (text.length > options.maxDescriptionLength) {
-    text = text.slice(0, options.maxDescriptionLength).trimEnd() + "…";
-  }
-
-  return text || undefined;
+  return truncateToMax(text, options) || undefined;
 }
 
 export function cleanUrl(

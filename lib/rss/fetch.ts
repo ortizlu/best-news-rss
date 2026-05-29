@@ -1,7 +1,14 @@
 import Parser from 'rss-parser';
 import { fetchAndCleanNewsBreakFeed, isNewsBreakFeedUrl } from '../newsbreak/fetch';
 import type { CleanOptions } from '../types';
-import { cleanText, cleanUrl, escapeXml, extractFirstImageUrl, extractLeadText } from './clean';
+import {
+    cleanText,
+    cleanUrl,
+    escapeXml,
+    extractArticleText,
+    extractFirstImageUrl,
+    extractLeadText
+} from './clean';
 import { formatPubDate } from './dates';
 
 type CustomItem = {
@@ -65,9 +72,18 @@ export async function fetchAndCleanFeed(
         const htmlBody = item.content ?? item.contentEncoded ?? item['content:encoded'] ?? item.summary;
         const plainSnippet = item.contentSnippet;
 
-        const description = options.dropFullContent
-            ? (extractLeadText(htmlBody ?? plainSnippet, options) ?? extractLeadText(plainSnippet, options))
-            : extractLeadText(htmlBody ?? plainSnippet, options);
+        const description =
+            options.maxParagraphs > 1
+                ? (extractArticleText(
+                      typeof htmlBody === 'string' ? htmlBody : undefined,
+                      options
+                  ) ??
+                  extractLeadText(htmlBody ?? plainSnippet, options) ??
+                  extractLeadText(plainSnippet, options))
+                : options.dropFullContent
+                  ? (extractLeadText(htmlBody ?? plainSnippet, options) ??
+                    extractLeadText(plainSnippet, options))
+                  : extractLeadText(htmlBody ?? plainSnippet, options);
 
         const articleLink = cleanUrl(item.link, options.removeTrackingParams);
         const imageFromHtml = extractFirstImageUrl(typeof htmlBody === 'string' ? htmlBody : undefined);

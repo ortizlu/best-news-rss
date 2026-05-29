@@ -47,7 +47,17 @@ For full-bleed background images with readable text overlay, use a **Website/iFr
 
 `https://your-app.vercel.app/display?seconds=14`
 
-Stories rotate every 14 seconds (change with `?seconds=5` through `120`). Items with lead images are shown first; others use a gradient fallback. The page reloads every 5 minutes to pick up fresh headlines.
+Stories rotate every 14 seconds (change with `?seconds=5` through `120`). The page reloads every 5 minutes to pick up fresh headlines.
+
+**Why does text still look cropped?** Content is limited in three places:
+
+1. **Extraction** (`lib/display/items.ts`) — `maxParagraphs` (default `8` for display) and `maxDescriptionLength` (`1000`). RSS feeds often only ship one short summary paragraph.
+2. **Cleaning** (`lib/rss/clean.ts`) — `dropFullContent: true` on `/rss/all` keeps only the lead paragraph; display sets `dropFullContent: false` and uses multiple `<p>` tags when available.
+3. **CSS** (`app/display/display.css`) — `-webkit-line-clamp` on `.display-description` hides overflow in the widget. Raise or remove it to show more lines.
+
+Debug: open `/api/display` in a browser and check the `description` field length before blaming the widget CSS.
+
+**Missing images on `/display`:** If the RSS item has no image, the app fetches the article URL and uses `og:image` / `twitter:image` from the page HTML. Stories with no RSS image and no OG tag keep the gradient-only background. Some sites block automated fetches; AP/BBC summaries in third-party feeds may still lack a usable hero URL.
 
 Opening the URL in a browser shows raw RSS 2.0 XML (`application/rss+xml`).
 

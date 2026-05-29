@@ -1,5 +1,6 @@
 import { loadFeeds } from '../feeds-store';
 import { DEFAULT_CLEAN_OPTIONS } from '../rss/clean';
+import { enrichStoriesWithOgImages } from '../rss/og-image';
 import { fetchAndMergeFeeds } from '../rss/merge';
 
 export type DisplayStory = {
@@ -25,14 +26,16 @@ export async function getDisplayStories(maxItems = 30): Promise<DisplayStory[]> 
         ...DEFAULT_CLEAN_OPTIONS,
         includeItemLinks: true,
         includeImages: true,
-        maxDescriptionLength: 1000
+        maxDescriptionLength: 1000,
+        maxParagraphs: 8,
+        dropFullContent: false
     };
 
     const merged = await fetchAndMergeFeeds(feeds, options, maxItems);
 
     const sorted = [...merged.items].sort((a, b) => pubDateMs(b.pubDate) - pubDateMs(a.pubDate));
 
-    return sorted.map(item => ({
+    const stories: DisplayStory[] = sorted.map(item => ({
         title: item.title,
         description: item.description,
         source: item.source,
@@ -40,4 +43,7 @@ export async function getDisplayStories(maxItems = 30): Promise<DisplayStory[]> 
         imageUrl: item.imageUrl,
         pubDate: item.pubDate
     }));
+
+    // No RSS image → use the article page's og:image (hero photo).
+    return enrichStoriesWithOgImages(stories);
 }

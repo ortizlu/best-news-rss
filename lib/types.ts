@@ -10,6 +10,8 @@ export type CleanOptions = {
   includeItemLinks: boolean;
   /** Emit &lt;enclosure&gt; for the lead image when one exists in the source. */
   includeImages: boolean;
+  /** How many HTML &lt;p&gt; blocks to include. 1 = lead paragraph only (default). */
+  maxParagraphs: number;
 };
 
 export type FeedSource = {
