@@ -1,4 +1,7 @@
 import type { NextConfig } from "next";
+import { displayFrameAncestorsCsp } from "./lib/display/frame-ancestors";
+
+const displayEmbedPolicy = displayFrameAncestorsCsp();
 
 const nextConfig: NextConfig = {
   async headers() {
@@ -8,7 +11,7 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: "Content-Security-Policy",
-            value: "frame-ancestors *",
+            value: displayEmbedPolicy,
           },
         ],
       },
@@ -17,7 +20,7 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: "Content-Security-Policy",
-            value: "frame-ancestors *",
+            value: displayEmbedPolicy,
           },
         ],
       },

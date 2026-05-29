@@ -9,7 +9,7 @@ import {
     type RefObject
 } from 'react';
 import type { DisplayStory } from '@/lib/display/items';
-import { needsDescriptionFade } from '@/lib/display/overflow-fade';
+import { fitDescriptionText } from '@/lib/display/truncate-description';
 import './display.css';
 
 function formatRelativeTime(pubDate?: string): string {
@@ -34,31 +34,34 @@ type Props = {
 
 type StoryTextProps = {
     story: DisplayStory;
-    isActive: boolean;
-    fadeDescription: boolean;
+    descriptionText?: string;
     textStackRef?: RefObject<HTMLDivElement | null>;
+    metaRef?: RefObject<HTMLDivElement | null>;
+    titleRef?: RefObject<HTMLHeadingElement | null>;
     descriptionRef?: RefObject<HTMLParagraphElement | null>;
 };
 
 function StoryText({
     story,
-    isActive,
-    fadeDescription,
+    descriptionText,
     textStackRef,
+    metaRef,
+    titleRef,
     descriptionRef
 }: StoryTextProps) {
+    const body = descriptionText ?? story.description;
+
     return (
         <div ref={textStackRef} className="display-text-stack">
-            <div className="display-meta">
+            <div ref={metaRef} className="display-meta">
                 {[story.source, formatRelativeTime(story.pubDate)].filter(Boolean).join('  ·  ')}
             </div>
-            <h1 className="display-title">{story.title}</h1>
-            {story.description && (
-                <p
-                    ref={descriptionRef}
-                    className={`display-description${isActive && fadeDescription ? ' display-description--fade-bottom' : ''}`}
-                >
-                    {story.description}
+            <h1 ref={titleRef} className="display-title">
+                {story.title}
+            </h1>
+            {body && (
+                <p ref={descriptionRef} className="display-description">
+                    {body}
                 </p>
             )}
         </div>
@@ -69,14 +72,18 @@ export default function DisplayPlayer({ stories, intervalSeconds, showProgress }
     const [index, setIndex] = useState(0);
     const [progress, setProgress] = useState(0);
     const [brokenImages, setBrokenImages] = useState<Set<number>>(new Set());
-    const [fadeDescription, setFadeDescription] = useState(false);
+    const [descriptionText, setDescriptionText] = useState<string | undefined>();
     const textStackRef = useRef<HTMLDivElement>(null);
+    const metaRef = useRef<HTMLDivElement>(null);
+    const titleRef = useRef<HTMLHeadingElement>(null);
     const descriptionRef = useRef<HTMLParagraphElement>(null);
 
     const playable = useMemo(() => {
         if (stories.length === 0) return [];
         return stories;
     }, [stories]);
+
+    const activeStory = playable[index];
 
     const advance = useCallback(() => {
         setIndex(i => (playable.length ? (i + 1) % playable.length : 0));
@@ -111,27 +118,37 @@ export default function DisplayPlayer({ stories, intervalSeconds, showProgress }
     }, [index, showProgress]);
 
     useEffect(() => {
-        setFadeDescription(false);
-        const stack = textStackRef.current;
-        const desc = descriptionRef.current;
-        if (!stack) return;
+        const full = activeStory?.description;
+        if (!full) {
+            setDescriptionText(undefined);
+            return;
+        }
 
-        const check = () => {
-            setFadeDescription(needsDescriptionFade(stack, desc));
+        const stack = textStackRef.current;
+        const meta = metaRef.current;
+        const title = titleRef.current;
+        const desc = descriptionRef.current;
+        if (!stack || !desc) return;
+
+        const measure = () => {
+            const next = fitDescriptionText(stack, meta, title, desc, full);
+            setDescriptionText(prev => (prev === next ? prev : next));
         };
 
-        check();
-        const raf = requestAnimationFrame(check);
-        const ro = new ResizeObserver(check);
+        measure();
+        const raf = requestAnimationFrame(measure);
+        const ro = new ResizeObserver(measure);
         ro.observe(stack);
-        if (desc) ro.observe(desc);
-        window.addEventListener('resize', check);
+        if (meta) ro.observe(meta);
+        if (title) ro.observe(title);
+        ro.observe(desc);
+        window.addEventListener('resize', measure);
         return () => {
             cancelAnimationFrame(raf);
             ro.disconnect();
-            window.removeEventListener('resize', check);
+            window.removeEventListener('resize', measure);
         };
-    }, [index, playable]);
+    }, [index, activeStory?.description]);
 
     useEffect(() => {
         const refreshMs = 5 * 60 * 1000;
@@ -194,18 +211,20 @@ export default function DisplayPlayer({ stories, intervalSeconds, showProgress }
                                 >
                                     <StoryText
                                         story={story}
-                                        isActive={i === index}
-                                        fadeDescription={fadeDescription}
+                                        descriptionText={i === index ? descriptionText : story.description}
                                         textStackRef={i === index ? textStackRef : undefined}
+                                        metaRef={i === index ? metaRef : undefined}
+                                        titleRef={i === index ? titleRef : undefined}
                                         descriptionRef={i === index ? descriptionRef : undefined}
                                     />
                                 </a>
                             ) : (
                                 <StoryText
                                     story={story}
-                                    isActive={i === index}
-                                    fadeDescription={fadeDescription}
+                                    descriptionText={i === index ? descriptionText : story.description}
                                     textStackRef={i === index ? textStackRef : undefined}
+                                    metaRef={i === index ? metaRef : undefined}
+                                    titleRef={i === index ? titleRef : undefined}
                                     descriptionRef={i === index ? descriptionRef : undefined}
                                 />
                             )}

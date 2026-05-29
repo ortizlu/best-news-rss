@@ -79,22 +79,6 @@
     flex-shrink: 1;
 }
 
-/* When overflow cuts mid-sentence (not a clean paragraph end). */
-.display-description--fade-bottom {
-    -webkit-mask-image: linear-gradient(
-        to bottom,
-        #000 0%,
-        #000 calc(100% - 2.75em),
-        transparent 100%
-    );
-    mask-image: linear-gradient(
-        to bottom,
-        #000 0%,
-        #000 calc(100% - 2.75em),
-        transparent 100%
-    );
-}
-
 .display-meta {
     font-size: clamp(14px, 8cqh, 20px);
     color: rgba(255, 255, 255, 0.72);
@@ -131,9 +115,6 @@
     flex: 1 1 auto;
     min-height: 0;
     overflow: hidden;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 8;
     white-space: pre-line;
     text-shadow: 0 1px 10px rgba(0, 0, 0, 0.55);
 }
@@ -170,7 +151,6 @@
     }
 
     .display-description {
-        -webkit-line-clamp: 6;
         font-size: clamp(24px, 16cqh, 36px);
         line-height: 1.15;
     }
@@ -186,7 +166,6 @@
     }
 
     .display-description {
-        -webkit-line-clamp: 4;
         font-size: clamp(18px, 13cqh, 26px);
         line-height: 1.1;
     }
