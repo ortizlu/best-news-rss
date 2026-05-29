@@ -25,17 +25,14 @@ export async function getDisplayStories(maxItems = 30): Promise<DisplayStory[]> 
     ...DEFAULT_CLEAN_OPTIONS,
     includeItemLinks: true,
     includeImages: true,
-    maxDescriptionLength: 220,
+    maxDescriptionLength: 600,
   };
 
   const merged = await fetchAndMergeFeeds(feeds, options, maxItems);
 
-  const sorted = [...merged.items].sort((a, b) => {
-    const aHasImage = a.imageUrl ? 1 : 0;
-    const bHasImage = b.imageUrl ? 1 : 0;
-    if (aHasImage !== bHasImage) return bHasImage - aHasImage;
-    return pubDateMs(b.pubDate) - pubDateMs(a.pubDate);
-  });
+  const sorted = [...merged.items].sort(
+    (a, b) => pubDateMs(b.pubDate) - pubDateMs(a.pubDate),
+  );
 
   return sorted.map((item) => ({
     title: item.title,

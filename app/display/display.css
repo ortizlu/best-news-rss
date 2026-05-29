@@ -1,4 +1,4 @@
-/* Size fonts from the iframe itself (wide + short Dakboard blocks). */
+/* Text-first layout: centered copy, image only as a dim backdrop. */
 .display-page {
   position: fixed;
   inset: 0;
@@ -29,21 +29,14 @@
   background-color: #121820;
   background-size: cover;
   background-position: center;
-  transform: scale(1.04);
+  opacity: 0.32;
+  filter: saturate(0.65) brightness(0.7);
 }
 
-/* Original-style gradient: photo visible on top, readable text at bottom */
 .display-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    to top,
-    rgba(8, 10, 14, 0.93) 0%,
-    rgba(8, 10, 14, 0.82) 40%,
-    rgba(8, 10, 14, 0.45) 65%,
-    rgba(8, 10, 14, 0.15) 85%,
-    rgba(8, 10, 14, 0.05) 100%
-  );
+  background: rgba(8, 10, 14, 0.82);
 }
 
 .display-content {
@@ -52,45 +45,54 @@
   z-index: 2;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
   box-sizing: border-box;
-  padding: 5cqh 5.5cqw 6cqh;
+  padding: 4cqh 5cqw;
   width: 100%;
+  max-height: 100%;
+  overflow: hidden;
 }
 
 .display-meta {
-  font-size: clamp(12px, 7cqh, 17px);
-  color: rgba(255, 255, 255, 0.78);
-  margin: 0 0 1.5cqh;
+  font-size: clamp(11px, 6.5cqh, 16px);
+  color: rgba(255, 255, 255, 0.72);
+  margin: 0 0 1.2cqh;
   letter-spacing: 0.02em;
   line-height: 1.2;
+  flex-shrink: 0;
+  width: 100%;
 }
 
 .display-title {
-  font-size: clamp(16px, 17cqh, 40px);
+  font-size: clamp(14px, 14cqh, 34px);
   font-weight: 600;
-  line-height: 1.1;
-  margin: 0 0 1.5cqh;
+  line-height: 1.12;
+  margin: 0 0 1.2cqh;
   letter-spacing: -0.02em;
-  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.55);
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.65);
+  width: 100%;
+  flex-shrink: 0;
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 4;
   overflow: hidden;
-  width: 100%;
 }
 
 .display-description {
-  font-size: clamp(12px, 9.5cqh, 20px);
-  line-height: 1.3;
-  color: rgba(255, 255, 255, 0.92);
+  font-size: clamp(11px, 8cqh, 17px);
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.9);
   margin: 0;
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-  overflow: hidden;
-  width: 100%;
-  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.45);
+  -webkit-line-clamp: 8;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.5);
 }
 
 .display-empty {
@@ -115,37 +117,32 @@
   transition: width 0.2s linear;
 }
 
-/* Wide, short blocks (typical Dakboard news strip) */
-@container (min-aspect-ratio: 1.4) {
-  .display-content {
-    padding: 4cqh 5cqw 5cqh;
-  }
-
+/* Wide, short Dakboard strip: more lines of body copy */
+@container (min-aspect-ratio: 1.35) {
   .display-title {
-    -webkit-line-clamp: 2;
-    font-size: clamp(15px, 19cqh, 38px);
+    -webkit-line-clamp: 3;
+    font-size: clamp(13px, 15cqh, 30px);
   }
 
   .display-description {
-    -webkit-line-clamp: 2;
-    font-size: clamp(11px, 10cqh, 18px);
+    -webkit-line-clamp: 6;
+    font-size: clamp(10px, 7.5cqh, 16px);
   }
 }
 
-/* Very short height: prioritize big headline */
 @container (max-height: 160px) {
-  .display-description {
-    display: none;
+  .display-title {
+    -webkit-line-clamp: 2;
+    font-size: clamp(12px, 16cqh, 26px);
+    margin-bottom: 0.8cqh;
   }
 
-  .display-title {
+  .display-description {
     -webkit-line-clamp: 3;
-    font-size: clamp(14px, 20cqh, 32px);
-    margin-bottom: 0;
+    font-size: clamp(10px, 7cqh, 14px);
   }
 
   .display-meta {
-    font-size: clamp(10px, 8cqh, 14px);
-    margin-bottom: 1cqh;
+    margin-bottom: 0.8cqh;
   }
 }
