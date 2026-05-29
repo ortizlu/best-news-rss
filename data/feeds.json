@@ -1,29 +1,44 @@
 {
-  "feeds": [
-    {
-      "id": "wa-post-world",
-      "name": "Washington Post World",
-      "url": "https://feeds.washingtonpost.com/rss/world"
-    },
-    {
-      "id": "wa-post-entertainment",
-      "name": "Washington Post Entertainment",
-      "url": "https://feeds.washingtonpost.com/rss/entertainment"
-    },
-    {
-      "id": "alxnow",
-      "name": "ALXnow",
-      "url": "https://alxnow.com/feed"
-    },
-    {
-      "id": "ap",
-      "name": "Associated Press",
-      "url": "https://feedx.net/rss/ap.xml"
-    },
-    {
-      "id": "bbc-world",
-      "name": "BBC News",
-      "url": "https://feeds.bbci.co.uk/news/world/rss.xml"
-    }
-  ]
+    "feeds": [
+        {
+            "id": "wa-post-world",
+            "name": "Washington Post World",
+            "url": "https://feeds.washingtonpost.com/rss/world"
+        },
+        {
+            "id": "wa-post-entertainment",
+            "name": "Washington Post Entertainment",
+            "url": "https://feeds.washingtonpost.com/rss/entertainment"
+        },
+        {
+            "id": "alxnow",
+            "name": "ALXnow",
+            "url": "https://alxnow.com/feed"
+        },
+        {
+            "id": "ap",
+            "name": "Associated Press",
+            "url": "https://feedx.net/rss/ap.xml"
+        },
+        {
+            "id": "bbc-world",
+            "name": "BBC News",
+            "url": "https://feeds.bbci.co.uk/news/world/rss.xml"
+        },
+        {
+            "id": "wtop",
+            "name": "WTOP",
+            "url": "https://wtop.com/feed/"
+        },
+        {
+            "id": "newsbreak-groveton",
+            "name": "NewsBreak · Groveton",
+            "url": "https://www.newsbreak.com/groveton-va"
+        },
+        {
+            "id": "newsbreak-arlington",
+            "name": "NewsBreak · Arlington",
+            "url": "https://www.newsbreak.com/arlington-va"
+        }
+    ]
 }

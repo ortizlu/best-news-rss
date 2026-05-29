@@ -1,4 +1,8 @@
 import Parser from "rss-parser";
+import {
+  fetchAndCleanNewsBreakFeed,
+  isNewsBreakFeedUrl,
+} from "../newsbreak/fetch";
 import type { CleanOptions } from "../types";
 import {
   cleanText,
@@ -7,6 +11,7 @@ import {
   extractFirstImageUrl,
   extractLeadText,
 } from "./clean";
+import { formatPubDate } from "./dates";
 
 type CustomItem = {
   "content:encoded"?: string;
@@ -52,19 +57,17 @@ export type CleanedItem = {
   source?: string;
 };
 
-/** RSS readers (e.g. Dakboard) expect RFC 822 dates on &lt;pubDate&gt;. */
-export function formatPubDate(dateStr: string | undefined): string | undefined {
-  if (!dateStr) return undefined;
-  const d = new Date(dateStr);
-  if (Number.isNaN(d.getTime())) return undefined;
-  return d.toUTCString();
-}
+export { formatPubDate } from "./dates";
 
 export async function fetchAndCleanFeed(
   feedUrl: string,
   options: CleanOptions,
   sourceName?: string,
 ): Promise<CleanedFeed> {
+  if (isNewsBreakFeedUrl(feedUrl)) {
+    return fetchAndCleanNewsBreakFeed(feedUrl, options, sourceName);
+  }
+
   const parsed = await parser.parseURL(feedUrl);
 
   const items: CleanedItem[] = (parsed.items ?? []).map((item) => {

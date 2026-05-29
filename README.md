@@ -31,7 +31,15 @@ Paste one of these into Dakboard → Add block → **RSS Feed** → Feed URL:
 
 Query overrides: `?links=true`, `?images=true` (e.g. `/rss/all?links=true`).
 
-Configured sources live in `data/feeds.json` (Washington Post world & entertainment, ALXnow, AP, BBC World).
+Configured sources live in `data/feeds.json` (Washington Post world & entertainment, ALXnow, AP, BBC World, WTOP, NewsBreak Groveton).
+
+### NewsBreak local pages
+
+NewsBreak does not offer a public RSS URL for readers ([they accept RSS from publishers, not the other way around](https://help.newsbreak.com/hc/en-us/articles/36837190635405-How-do-I-deliver-my-content-to-NewsBreak)). This app can turn a location page into RSS by reading its embedded feed data, e.g.:
+
+`https://www.newsbreak.com/groveton-va` → included in `/rss/all` or alone at `/rss/newsbreak-groveton`
+
+Add any location slug from the NewsBreak URL path to `data/feeds.json`.
 
 Opening the URL in a browser shows raw RSS 2.0 XML (`application/rss+xml`).
 
