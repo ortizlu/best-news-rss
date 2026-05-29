@@ -27,56 +27,81 @@
   background-color: #121820;
   background-size: cover;
   background-position: center;
-  transform: scale(1.03);
+  transform: scale(1.05);
 }
 
+/* Darken most of the frame so text stays readable on any image */
 .display-overlay {
   position: absolute;
   inset: 0;
   background: linear-gradient(
     to top,
-    rgba(6, 8, 12, 0.94) 0%,
-    rgba(6, 8, 12, 0.72) 38%,
-    rgba(6, 8, 12, 0.35) 62%,
-    rgba(6, 8, 12, 0.2) 100%
+    rgba(6, 8, 12, 0.97) 0%,
+    rgba(6, 8, 12, 0.94) 35%,
+    rgba(6, 8, 12, 0.78) 55%,
+    rgba(6, 8, 12, 0.45) 72%,
+    rgba(6, 8, 12, 0.15) 100%
   );
 }
 
 .display-content {
   position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  padding: clamp(1.25rem, 4vw, 2.5rem);
+  inset: 0;
   z-index: 2;
-  max-width: 52rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  box-sizing: border-box;
+  padding: clamp(0.5rem, 2.5vmin, 1.25rem);
+}
+
+/* Text panel fills the lower portion of the widget (most of a small block) */
+.display-text-panel {
+  flex: 1 1 auto;
+  min-height: 62%;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  width: 100%;
+  box-sizing: border-box;
+  padding: clamp(0.65rem, 3vmin, 1.35rem);
+  background: rgba(6, 8, 12, 0.42);
+  border-radius: clamp(6px, 1.5vmin, 12px);
+  backdrop-filter: blur(2px);
 }
 
 .display-meta {
-  font-size: clamp(0.8rem, 2vw, 0.95rem);
-  color: rgba(255, 255, 255, 0.72);
-  margin-bottom: 0.5rem;
+  font-size: clamp(0.7rem, 3.2vmin, 0.9rem);
+  color: rgba(255, 255, 255, 0.75);
+  margin-bottom: clamp(0.35rem, 1.5vmin, 0.5rem);
   letter-spacing: 0.02em;
+  flex-shrink: 0;
 }
 
 .display-title {
-  font-size: clamp(1.35rem, 4.2vw, 2.15rem);
+  font-size: clamp(1rem, 6.5vmin, 2rem);
   font-weight: 600;
-  line-height: 1.2;
-  margin: 0 0 0.65rem;
+  line-height: 1.15;
+  margin: 0 0 clamp(0.35rem, 1.5vmin, 0.55rem);
   letter-spacing: -0.02em;
-  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.45);
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.5);
+  flex-shrink: 0;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 5;
+  overflow: hidden;
 }
 
 .display-description {
-  font-size: clamp(0.9rem, 2.4vw, 1.05rem);
-  line-height: 1.45;
-  color: rgba(255, 255, 255, 0.88);
+  font-size: clamp(0.72rem, 3.8vmin, 1rem);
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.9);
   margin: 0;
-  max-width: 46rem;
+  flex: 0 1 auto;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
   overflow: hidden;
 }
 
@@ -89,6 +114,7 @@
   padding: 2rem;
   text-align: center;
   color: rgba(255, 255, 255, 0.6);
+  font-size: clamp(0.85rem, 3.5vmin, 1rem);
 }
 
 .display-progress {
@@ -99,4 +125,50 @@
   background: rgba(61, 139, 253, 0.85);
   z-index: 3;
   transition: width 0.2s linear;
+}
+
+/* Small Dakboard blocks: text dominates the frame */
+@media (max-height: 420px), (max-width: 520px) {
+  .display-overlay {
+    background: linear-gradient(
+      to top,
+      rgba(6, 8, 12, 0.98) 0%,
+      rgba(6, 8, 12, 0.96) 50%,
+      rgba(6, 8, 12, 0.85) 70%,
+      rgba(6, 8, 12, 0.5) 88%,
+      rgba(6, 8, 12, 0.2) 100%
+    );
+  }
+
+  .display-text-panel {
+    min-height: 78%;
+    background: rgba(6, 8, 12, 0.55);
+    padding: clamp(0.55rem, 3.5vmin, 1rem);
+  }
+
+  .display-title {
+    -webkit-line-clamp: 6;
+    font-size: clamp(0.9rem, 7.5vmin, 1.35rem);
+  }
+
+  .display-description {
+    -webkit-line-clamp: 3;
+    font-size: clamp(0.68rem, 4vmin, 0.85rem);
+  }
+}
+
+/* Very short strips: title only, panel nearly full height */
+@media (max-height: 200px) {
+  .display-text-panel {
+    min-height: 88%;
+  }
+
+  .display-description {
+    display: none;
+  }
+
+  .display-title {
+    -webkit-line-clamp: 4;
+    margin-bottom: 0;
+  }
 }

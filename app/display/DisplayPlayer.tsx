@@ -33,8 +33,6 @@ export default function DisplayPlayer({ stories, intervalSeconds }: Props) {
     return stories;
   }, [stories]);
 
-  const current = playable[index];
-
   const advance = useCallback(() => {
     setProgress(0);
     setIndex((i) => (playable.length ? (i + 1) % playable.length : 0));
@@ -113,15 +111,17 @@ export default function DisplayPlayer({ stories, intervalSeconds }: Props) {
             )}
             <div className="display-overlay" />
             <div className="display-content">
-              <div className="display-meta">
-                {[story.source, formatRelativeTime(story.pubDate)]
-                  .filter(Boolean)
-                  .join("  ·  ")}
+              <div className="display-text-panel">
+                <div className="display-meta">
+                  {[story.source, formatRelativeTime(story.pubDate)]
+                    .filter(Boolean)
+                    .join("  ·  ")}
+                </div>
+                <h1 className="display-title">{story.title}</h1>
+                {story.description && (
+                  <p className="display-description">{story.description}</p>
+                )}
               </div>
-              <h1 className="display-title">{story.title}</h1>
-              {story.description && (
-                <p className="display-description">{story.description}</p>
-              )}
             </div>
           </article>
         );
