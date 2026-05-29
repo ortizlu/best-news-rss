@@ -22,6 +22,13 @@ export function availableDescriptionHeight(
   return Math.max(0, container.clientHeight - used);
 }
 
+function splitParagraphs(text: string): string[] {
+  return text
+    .split(/\n\n+/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+}
+
 function caretAt(el: HTMLElement, x: number, y: number): Range | null {
   if (document.caretRangeFromPoint) {
     const range = document.caretRangeFromPoint(x, y);
@@ -80,15 +87,46 @@ function trimWordBoundary(text: string): string {
   return t;
 }
 
-function applyMeasureHeight(
-  desc: HTMLElement,
-  available: number,
-): void {
+function applyMeasureHeight(desc: HTMLElement, available: number): void {
   if (available > 0) {
     desc.style.maxHeight = `${available}px`;
   } else {
     desc.style.removeProperty("max-height");
   }
+}
+
+/** Drop a trailing fragment of the next paragraph (e.g. "The…"). */
+function dropPartialNextParagraph(text: string, fullText: string): string {
+  const lastBreak = text.lastIndexOf("\n\n");
+  if (lastBreak === -1) return text;
+
+  const shown = text.slice(lastBreak + 2).replace(/…$/, "").trim();
+  if (!shown) return text.slice(0, lastBreak).trimEnd();
+
+  const remainder = fullText.slice(lastBreak + 2).trim();
+  if (remainder.startsWith(shown) && shown.length < remainder.length) {
+    return text.slice(0, lastBreak).trimEnd();
+  }
+
+  return text;
+}
+
+/** Greedily include only whole paragraphs that fit. */
+function fitCompleteParagraphs(el: HTMLElement, fullText: string): string {
+  const paragraphs = splitParagraphs(fullText);
+  if (paragraphs.length === 0) return "";
+
+  let result = "";
+  for (const para of paragraphs) {
+    const next = result ? `${result}\n\n${para}` : para;
+    if (fitsInBox(el, next)) {
+      result = next;
+    } else {
+      break;
+    }
+  }
+
+  return result;
 }
 
 /** Longest prefix that fits without a partial bottom line. */
@@ -133,31 +171,36 @@ function truncateWithEllipsis(el: HTMLElement, fullText: string): string {
     }
   }
 
+  let result: string;
   if (best > 0) {
-    return trimWordBoundary(fullText.slice(0, best)) + ELLIPSIS;
-  }
-
-  // Tight box: fit as many characters as possible before the ellipsis.
-  lo = 1;
-  hi = fullText.length;
-  best = 0;
-  while (lo <= hi) {
-    const mid = Math.floor((lo + hi) / 2);
-    if (fitsInBox(el, fullText.slice(0, mid) + ELLIPSIS)) {
-      best = mid;
-      lo = mid + 1;
-    } else {
-      hi = mid - 1;
+    result = trimWordBoundary(fullText.slice(0, best)) + ELLIPSIS;
+  } else {
+    lo = 1;
+    hi = fullText.length;
+    best = 0;
+    while (lo <= hi) {
+      const mid = Math.floor((lo + hi) / 2);
+      if (fitsInBox(el, fullText.slice(0, mid) + ELLIPSIS)) {
+        best = mid;
+        lo = mid + 1;
+      } else {
+        hi = mid - 1;
+      }
     }
+    result =
+      best > 0
+        ? fullText.slice(0, best).trimEnd() + ELLIPSIS
+        : fitsInBox(el, fullText)
+          ? fullText
+          : fullText.slice(0, 120).trimEnd() + ELLIPSIS;
   }
 
-  if (best > 0) return fullText.slice(0, best).trimEnd() + ELLIPSIS;
-  return fitsInBox(el, fullText) ? fullText : fullText.slice(0, 120).trimEnd() + ELLIPSIS;
+  return dropPartialNextParagraph(result, fullText);
 }
 
 /**
- * Fit description to the widget: ellipsis only when overflow would leave a
- * clipped line at the bottom. Clean paragraph endings keep no ellipsis.
+ * Fit description to the widget: whole paragraphs only when possible;
+ * ellipsis only when a single paragraph must be cut mid-thought.
  */
 export function fitDescriptionText(
   container: HTMLElement,
@@ -174,10 +217,24 @@ export function fitDescriptionText(
     return fullText;
   }
 
-  if (!lastVisibleLineIsPartial(desc)) {
-    const clean = truncateToCleanEnd(desc, fullText);
-    return clean || truncateWithEllipsis(desc, fullText);
+  const paragraphFit = fitCompleteParagraphs(desc, fullText);
+  const trimmedFull = fullText.trim();
+
+  if (paragraphFit && paragraphFit.length < trimmedFull.length) {
+    return paragraphFit;
   }
 
-  return truncateWithEllipsis(desc, fullText);
+  const firstPara = splitParagraphs(fullText)[0] ?? fullText;
+
+  desc.textContent = firstPara;
+  if (desc.scrollHeight <= desc.clientHeight + 2) {
+    return firstPara;
+  }
+
+  if (!lastVisibleLineIsPartial(desc)) {
+    const clean = truncateToCleanEnd(desc, firstPara);
+    return clean || truncateWithEllipsis(desc, firstPara);
+  }
+
+  return truncateWithEllipsis(desc, firstPara);
 }
