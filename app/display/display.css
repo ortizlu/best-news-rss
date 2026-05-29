@@ -26,7 +26,7 @@
 .display-bg {
     position: absolute;
     inset: 0;
-    background-color: #121820;
+    background-color: #000;
     background-size: cover;
     background-position: center;
     opacity: 0.32;
