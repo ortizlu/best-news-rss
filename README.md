@@ -66,6 +66,8 @@ Example:
 vercel
 ```
 
+**Build error “No Output Directory named public”?** In [Vercel Project Settings](https://vercel.com/docs/project-configuration) → General → Build & Development Settings, set **Framework Preset** to **Next.js** and clear **Output Directory** (leave blank). This repo includes `vercel.json` so Vercel uses the Next.js builder instead of a static `public` folder.
+
 **Saving feeds in production:** Vercel’s filesystem is read-only at runtime. To add feeds on production you can:
 
 1. Edit `data/feeds.json` in git and redeploy, or
