@@ -1,4 +1,4 @@
-/* Text-first layout: centered copy, image only as a dim backdrop. */
+/* Text-first layout: left-aligned copy, image only as a dim backdrop. */
 .display-page {
     position: fixed;
     inset: 0;
@@ -46,10 +46,10 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: center;
-    text-align: center;
+    align-items: flex-start;
+    text-align: left;
     box-sizing: border-box;
-    padding: 2.5cqh 3.5cqw;
+    padding: 2.5cqh 4.5cqw;
     width: 100%;
     max-height: 100%;
     overflow: hidden;
@@ -69,7 +69,7 @@
     font-size: clamp(24px, 22cqh, 54px);
     font-weight: 700;
     line-height: 1.02;
-    margin: 0 0 0.8cqh;
+    margin: 0 0 1.8cqh;
     letter-spacing: -0.035em;
     text-shadow: 0 2px 16px rgba(0, 0, 0, 0.65);
     width: 100%;
@@ -82,7 +82,7 @@
 
 .display-description {
     font-size: clamp(22px, 15cqh, 34px);
-    font-weight: 500;
+    font-weight: 400;
     line-height: 1.18;
     color: rgba(255, 255, 255, 0.95);
     margin: 0;
@@ -123,6 +123,7 @@
     .display-title {
         -webkit-line-clamp: 2;
         font-size: clamp(24px, 22cqh, 52px);
+        margin-bottom: 1.6cqh;
     }
 
     .display-description {
@@ -137,7 +138,7 @@
     .display-title {
         -webkit-line-clamp: 2;
         font-size: clamp(20px, 21cqh, 40px);
-        margin-bottom: 0.6cqh;
+        margin-bottom: 1cqh;
     }
 
     .display-description {
