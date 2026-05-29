@@ -1,0 +1,29 @@
+{
+  "feeds": [
+    {
+      "id": "wa-post-world",
+      "name": "Washington Post World",
+      "url": "https://feeds.washingtonpost.com/rss/world"
+    },
+    {
+      "id": "wa-post-entertainment",
+      "name": "Washington Post Entertainment",
+      "url": "https://feeds.washingtonpost.com/rss/entertainment"
+    },
+    {
+      "id": "alxnow",
+      "name": "ALXnow",
+      "url": "https://alxnow.com/feed"
+    },
+    {
+      "id": "ap",
+      "name": "Associated Press",
+      "url": "https://feedx.net/rss/ap.xml"
+    },
+    {
+      "id": "bbc-world",
+      "name": "BBC News",
+      "url": "https://feeds.bbci.co.uk/news/world/rss.xml"
+    }
+  ]
+}
