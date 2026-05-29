@@ -66,11 +66,11 @@
 }
 
 .display-title {
-    font-size: clamp(20px, 18cqh, 44px);
-    font-weight: 600;
-    line-height: 1.12;
+    font-size: clamp(24px, 21cqh, 52px);
+    font-weight: 700;
+    line-height: 1.08;
     margin: 0 0 1.2cqh;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.03em;
     text-shadow: 0 2px 16px rgba(0, 0, 0, 0.65);
     width: 100%;
     flex-shrink: 0;
@@ -81,9 +81,9 @@
 }
 
 .display-description {
-    font-size: clamp(14px, 10cqh, 22px);
-    line-height: 1.35;
-    color: rgba(255, 255, 255, 0.9);
+    font-size: clamp(18px, 12cqh, 28px);
+    line-height: 1.42;
+    color: rgba(255, 255, 255, 0.92);
     margin: 0;
     width: 100%;
     flex: 1 1 auto;
@@ -117,29 +117,30 @@
     transition: width 0.2s linear;
 }
 
-/* Wide, short Dakboard strip: more lines of body copy */
+/* Wide, short Dakboard strip */
 @container (min-aspect-ratio: 1.35) {
     .display-title {
         -webkit-line-clamp: 3;
-        font-size: clamp(18px, 18cqh, 40px);
+        font-size: clamp(22px, 20cqh, 46px);
     }
 
     .display-description {
-        -webkit-line-clamp: 5;
-        font-size: clamp(14px, 9cqh, 20px);
+        -webkit-line-clamp: 4;
+        font-size: clamp(16px, 11cqh, 24px);
     }
 }
 
+/* Very short displays */
 @container (max-height: 160px) {
     .display-title {
         -webkit-line-clamp: 2;
-        font-size: clamp(16px, 18cqh, 34px);
+        font-size: clamp(18px, 20cqh, 38px);
         margin-bottom: 0.8cqh;
     }
 
     .display-description {
-        -webkit-line-clamp: 3;
-        font-size: clamp(12px, 9cqh, 18px);
+        -webkit-line-clamp: 2;
+        font-size: clamp(14px, 10cqh, 20px);
     }
 
     .display-meta {
