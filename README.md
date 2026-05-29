@@ -41,6 +41,14 @@ NewsBreak does not offer a public RSS URL for readers ([they accept RSS from pub
 
 Add any location slug from the NewsBreak URL path to `data/feeds.json`.
 
+### Dakboard image display (custom widget)
+
+For full-bleed background images with readable text overlay, use a **Website/iFrame** block (paid custom screens) pointing at:
+
+`https://your-app.vercel.app/display?seconds=14`
+
+Stories rotate every 14 seconds (change with `?seconds=5` through `120`). Items with lead images are shown first; others use a gradient fallback. The page reloads every 5 minutes to pick up fresh headlines.
+
 Opening the URL in a browser shows raw RSS 2.0 XML (`application/rss+xml`).
 
 ## API

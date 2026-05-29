@@ -1,0 +1,102 @@
+.display-page {
+  position: fixed;
+  inset: 0;
+  margin: 0;
+  overflow: hidden;
+  background: #0a0c10;
+  color: #f4f6fa;
+  font-family: "IBM Plex Sans", system-ui, sans-serif;
+}
+
+.display-slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.85s ease-in-out;
+  pointer-events: none;
+}
+
+.display-slide.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.display-bg {
+  position: absolute;
+  inset: 0;
+  background-color: #121820;
+  background-size: cover;
+  background-position: center;
+  transform: scale(1.03);
+}
+
+.display-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(6, 8, 12, 0.94) 0%,
+    rgba(6, 8, 12, 0.72) 38%,
+    rgba(6, 8, 12, 0.35) 62%,
+    rgba(6, 8, 12, 0.2) 100%
+  );
+}
+
+.display-content {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: clamp(1.25rem, 4vw, 2.5rem);
+  z-index: 2;
+  max-width: 52rem;
+}
+
+.display-meta {
+  font-size: clamp(0.8rem, 2vw, 0.95rem);
+  color: rgba(255, 255, 255, 0.72);
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.02em;
+}
+
+.display-title {
+  font-size: clamp(1.35rem, 4.2vw, 2.15rem);
+  font-weight: 600;
+  line-height: 1.2;
+  margin: 0 0 0.65rem;
+  letter-spacing: -0.02em;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.45);
+}
+
+.display-description {
+  font-size: clamp(0.9rem, 2.4vw, 1.05rem);
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.88);
+  margin: 0;
+  max-width: 46rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.display-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.display-progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: rgba(61, 139, 253, 0.85);
+  z-index: 3;
+  transition: width 0.2s linear;
+}

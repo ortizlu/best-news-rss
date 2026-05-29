@@ -98,6 +98,10 @@ export default function Home() {
     return `${origin}/rss/all/full?${query}`;
   }
 
+  function dakboardDisplayUrl(): string {
+    return `${origin}/display?seconds=14`;
+  }
+
   function dakboardUrl(feed: FeedSource): string {
     return `${origin}/rss/${feed.id}?${query}`;
   }
@@ -164,6 +168,47 @@ export default function Home() {
             onClick={() => navigator.clipboard.writeText(dakboardAllUrl())}
           >
             Copy text-only URL
+          </button>
+        </div>
+      </section>
+
+      <section className="card">
+        <h2>Dakboard — custom display (image background)</h2>
+        <p className="hint" style={{ marginTop: 0 }}>
+          Full-screen rotating cards with a photo background and dark overlay.
+          Use a paid custom screen → <strong>Website/iFrame</strong> block:
+        </p>
+        <code
+          style={{
+            display: "block",
+            fontFamily: "var(--mono)",
+            fontSize: "0.8rem",
+            wordBreak: "break-all",
+            color: "var(--text)",
+            marginBottom: "0.75rem",
+          }}
+        >
+          {origin
+            ? dakboardDisplayUrl()
+            : "https://best-news-rss.vercel.app/display?seconds=14"}
+        </code>
+        <div className="feed-actions">
+          <a
+            href={origin ? dakboardDisplayUrl() : "#"}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Preview display
+          </a>
+          <button
+            type="button"
+            className="btn-ghost"
+            disabled={!origin}
+            onClick={() =>
+              navigator.clipboard.writeText(dakboardDisplayUrl())
+            }
+          >
+            Copy iframe URL
           </button>
         </div>
       </section>
