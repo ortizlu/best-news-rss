@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { DisplayStory } from '@/lib/display/items';
 import './display.css';
 
+const showProgress = false;
 function formatRelativeTime(pubDate?: string): string {
     if (!pubDate) return '';
     const ms = Date.parse(pubDate);
@@ -75,7 +76,9 @@ export default function DisplayPlayer({ stories, intervalSeconds }: Props) {
 
     return (
         <div className="display-page">
-            <div className="display-progress" style={{ width: `${Math.min(progress, 1) * 100}%` }} aria-hidden />
+            {showProgress && (
+                <div className="display-progress" style={{ width: `${Math.min(progress, 1) * 100}%` }} aria-hidden />
+            )}
             {playable.map((story, i) => {
                 const showImage = story.imageUrl && !brokenImages.has(i);
                 return (
@@ -102,7 +105,7 @@ export default function DisplayPlayer({ stories, intervalSeconds }: Props) {
                                 onError={() => setBrokenImages(prev => new Set(prev).add(i))}
                             />
                         )}
-                        <div className="display-overlay" />
+                        {showImage && <div className="display-overlay" />}
                         <div className="display-content">
                             <div className="display-meta">
                                 {[story.source, formatRelativeTime(story.pubDate)].filter(Boolean).join('  ·  ')}
