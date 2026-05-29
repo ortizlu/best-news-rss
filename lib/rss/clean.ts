@@ -164,6 +164,11 @@ function isBoilerplateParagraph(text: string): boolean {
   if (text.length < 24) return true;
   if (/^\d{4}-\d{2}-\d{2}/.test(text)) return true;
   if (/^Read\s+More/i.test(text)) return true;
+  if (/^\[\s*Read\s*:/i.test(text)) return true;
+  if (/^More from U\.S\. News/i.test(text)) return true;
+  if (/originally appeared on/i.test(text)) return true;
+  if (/^Update \d{2}\/\d{2}\/\d{2}:/i.test(text)) return true;
+  if (/^Source$/i.test(text)) return true;
   if (/^Photo:/i.test(text)) return true;
   if (/^\(.*\)\s*$/i.test(text)) return true;
   return false;

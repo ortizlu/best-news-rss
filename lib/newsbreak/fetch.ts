@@ -2,6 +2,7 @@ import type { CleanOptions } from '../types';
 import type { CleanedFeed, CleanedItem } from '../rss/fetch';
 import { formatPubDate } from '../rss/dates';
 import { cleanText, extractLeadText } from '../rss/clean';
+import { isLowValueStory } from '../rss/junk';
 
 type NewsBreakFeedItem = {
     docid: string;
@@ -89,7 +90,8 @@ export async function fetchAndCleanNewsBreakFeed(
                 description,
                 source: publisher || channelTitle
             };
-        });
+        })
+        .filter(item => !isLowValueStory(item.title, item.description));
 
     return {
         title: channelTitle,

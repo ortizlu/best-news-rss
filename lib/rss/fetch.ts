@@ -11,6 +11,7 @@ import {
 } from './clean';
 import { formatPubDate } from './dates';
 import { isLikelyEnglish } from './language';
+import { isLowValueStory } from './junk';
 
 type CustomItem = {
     'content:encoded'?: string;
@@ -58,12 +59,46 @@ export type CleanedItem = {
 
 export { formatPubDate } from './dates';
 
-function filterEnglishOnlyItems(
-    items: CleanedItem[],
-    englishOnly: boolean,
-): CleanedItem[] {
-    if (!englishOnly) return items;
+type RssItem = Parser.Item & CustomItem;
+
+function paragraphCount(html: string): number {
+    return (html.match(/<p[\s>]/gi) ?? []).length;
+}
+
+/**
+ * WTOP/WordPress put a short teaser in &lt;description&gt; (rss-parser `content`)
+ * and the full article in content:encoded. Prefer the richer body unless
+ * dropFullContent asks for lead-only RSS output.
+ */
+function resolveItemHtmlBody(item: RssItem, options: CleanOptions): string | undefined {
+    const encoded =
+        typeof item.contentEncoded === 'string'
+            ? item.contentEncoded
+            : typeof item['content:encoded'] === 'string'
+              ? item['content:encoded']
+              : undefined;
+    const content = typeof item.content === 'string' ? item.content : undefined;
+    const summary = typeof item.summary === 'string' ? item.summary : undefined;
+
+    if (options.dropFullContent && options.maxParagraphs <= 1) {
+        return content ?? summary ?? encoded;
+    }
+
+    const candidates = [encoded, content, summary].filter((v): v is string => Boolean(v));
+    if (candidates.length === 0) return undefined;
+
+    return candidates.reduce((best, cur) => {
+        const curParas = paragraphCount(cur);
+        const bestParas = paragraphCount(best);
+        if (curParas !== bestParas) return curParas > bestParas ? cur : best;
+        return cur.length > best.length ? cur : best;
+    });
+}
+
+function filterFeedItems(items: CleanedItem[], englishOnly: boolean): CleanedItem[] {
     return items.filter(item => {
+        if (isLowValueStory(item.title, item.description)) return false;
+        if (!englishOnly) return true;
         const sample = `${item.title} ${item.description ?? ''}`;
         return isLikelyEnglish(sample);
     });
@@ -77,13 +112,13 @@ export async function fetchAndCleanFeed(
 ): Promise<CleanedFeed> {
     if (isNewsBreakFeedUrl(feedUrl)) {
         const feed = await fetchAndCleanNewsBreakFeed(feedUrl, options, sourceName);
-        return { ...feed, items: filterEnglishOnlyItems(feed.items, englishOnly) };
+        return { ...feed, items: filterFeedItems(feed.items, englishOnly) };
     }
 
     const parsed = await parser.parseURL(feedUrl);
 
     const items: CleanedItem[] = (parsed.items ?? []).map(item => {
-        const htmlBody = item.content ?? item.contentEncoded ?? item['content:encoded'] ?? item.summary;
+        const htmlBody = resolveItemHtmlBody(item, options);
         const plainSnippet = item.contentSnippet;
 
         const description =
@@ -137,7 +172,7 @@ export async function fetchAndCleanFeed(
         title: parsed.title ?? 'Cleaned feed',
         link: cleanUrl(parsed.link, options.removeTrackingParams),
         description: cleanText(parsed.description, options),
-        items: filterEnglishOnlyItems(items, englishOnly),
+        items: filterFeedItems(items, englishOnly),
     };
 }
 
