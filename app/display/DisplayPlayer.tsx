@@ -1,6 +1,13 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+    type RefObject
+} from 'react';
 import type { DisplayStory } from '@/lib/display/items';
 import { needsDescriptionFade } from '@/lib/display/overflow-fade';
 import './display.css';
@@ -24,6 +31,39 @@ type Props = {
     intervalSeconds: number;
     showProgress: boolean;
 };
+
+type StoryTextProps = {
+    story: DisplayStory;
+    isActive: boolean;
+    fadeDescription: boolean;
+    textStackRef?: RefObject<HTMLDivElement | null>;
+    descriptionRef?: RefObject<HTMLParagraphElement | null>;
+};
+
+function StoryText({
+    story,
+    isActive,
+    fadeDescription,
+    textStackRef,
+    descriptionRef
+}: StoryTextProps) {
+    return (
+        <div ref={textStackRef} className="display-text-stack">
+            <div className="display-meta">
+                {[story.source, formatRelativeTime(story.pubDate)].filter(Boolean).join('  ·  ')}
+            </div>
+            <h1 className="display-title">{story.title}</h1>
+            {story.description && (
+                <p
+                    ref={descriptionRef}
+                    className={`display-description${isActive && fadeDescription ? ' display-description--fade-bottom' : ''}`}
+                >
+                    {story.description}
+                </p>
+            )}
+        </div>
+    );
+}
 
 export default function DisplayPlayer({ stories, intervalSeconds, showProgress }: Props) {
     const [index, setIndex] = useState(0);
@@ -144,25 +184,31 @@ export default function DisplayPlayer({ stories, intervalSeconds, showProgress }
                         )}
                         {showImage && <div className="display-overlay" />}
                         <div className="display-content">
-                            <div
-                                ref={i === index ? textStackRef : undefined}
-                                className="display-text-stack"
-                            >
-                                <div className="display-meta">
-                                    {[story.source, formatRelativeTime(story.pubDate)]
-                                        .filter(Boolean)
-                                        .join('  ·  ')}
-                                </div>
-                                <h1 className="display-title">{story.title}</h1>
-                                {story.description && (
-                                    <p
-                                        ref={i === index ? descriptionRef : undefined}
-                                        className={`display-description${i === index && fadeDescription ? ' display-description--fade-bottom' : ''}`}
-                                    >
-                                        {story.description}
-                                    </p>
-                                )}
-                            </div>
+                            {story.link ? (
+                                <a
+                                    className="display-article-link"
+                                    href={story.link}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    aria-label={`Read article: ${story.title}`}
+                                >
+                                    <StoryText
+                                        story={story}
+                                        isActive={i === index}
+                                        fadeDescription={fadeDescription}
+                                        textStackRef={i === index ? textStackRef : undefined}
+                                        descriptionRef={i === index ? descriptionRef : undefined}
+                                    />
+                                </a>
+                            ) : (
+                                <StoryText
+                                    story={story}
+                                    isActive={i === index}
+                                    fadeDescription={fadeDescription}
+                                    textStackRef={i === index ? textStackRef : undefined}
+                                    descriptionRef={i === index ? descriptionRef : undefined}
+                                />
+                            )}
                         </div>
                     </article>
                 );
