@@ -23,6 +23,13 @@ const TENNIS_RESULT_LINE =
 
 const SET_SCORE = /\d-\d\s*\(\d+\)/;
 
+/** AP/Zacks automated earnings blurbs syndicated as news. */
+const EARNINGS_SNAPSHOT_TITLE =
+  /\b(?:earnings|revenue)\s+snapshot\b|\bfiscal\s+q[1-4]\s+earnings\b/i;
+
+const AUTOMATED_FINANCE_BODY =
+  /\b(?:generated|produced)\s+by\s+automated\s+insights\b|\bautomatedinsights\.com\b|\bzacks\s+investment\s+research\b|\baccess\s+a\s+zacks\s+stock\s+report\b/i;
+
 function countMatches(text: string, re: RegExp): number {
   return [...text.matchAll(re)].length;
 }
@@ -54,6 +61,9 @@ export function isLowValueStory(title: string, description?: string): boolean {
 
   // Pure scoreboard copy with no narrative hook.
   if (countMatches(body, TENNIS_RESULT_LINE) >= 3) return true;
+
+  if (EARNINGS_SNAPSHOT_TITLE.test(t)) return true;
+  if (AUTOMATED_FINANCE_BODY.test(combined)) return true;
 
   return false;
 }
