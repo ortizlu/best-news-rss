@@ -1,7 +1,8 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { DisplayStory } from '@/lib/display/items';
+import { needsDescriptionFade } from '@/lib/display/overflow-fade';
 import './display.css';
 
 function formatRelativeTime(pubDate?: string): string {
@@ -28,6 +29,9 @@ export default function DisplayPlayer({ stories, intervalSeconds, showProgress }
     const [index, setIndex] = useState(0);
     const [progress, setProgress] = useState(0);
     const [brokenImages, setBrokenImages] = useState<Set<number>>(new Set());
+    const [fadeDescription, setFadeDescription] = useState(false);
+    const textStackRef = useRef<HTMLDivElement>(null);
+    const descriptionRef = useRef<HTMLParagraphElement>(null);
 
     const playable = useMemo(() => {
         if (stories.length === 0) return [];
@@ -65,6 +69,29 @@ export default function DisplayPlayer({ stories, intervalSeconds, showProgress }
         if (!showProgress) return;
         setProgress(0);
     }, [index, showProgress]);
+
+    useEffect(() => {
+        setFadeDescription(false);
+        const stack = textStackRef.current;
+        const desc = descriptionRef.current;
+        if (!stack) return;
+
+        const check = () => {
+            setFadeDescription(needsDescriptionFade(stack, desc));
+        };
+
+        check();
+        const raf = requestAnimationFrame(check);
+        const ro = new ResizeObserver(check);
+        ro.observe(stack);
+        if (desc) ro.observe(desc);
+        window.addEventListener('resize', check);
+        return () => {
+            cancelAnimationFrame(raf);
+            ro.disconnect();
+            window.removeEventListener('resize', check);
+        };
+    }, [index, playable]);
 
     useEffect(() => {
         const refreshMs = 5 * 60 * 1000;
@@ -117,11 +144,25 @@ export default function DisplayPlayer({ stories, intervalSeconds, showProgress }
                         )}
                         {showImage && <div className="display-overlay" />}
                         <div className="display-content">
-                            <div className="display-meta">
-                                {[story.source, formatRelativeTime(story.pubDate)].filter(Boolean).join('  ·  ')}
+                            <div
+                                ref={i === index ? textStackRef : undefined}
+                                className="display-text-stack"
+                            >
+                                <div className="display-meta">
+                                    {[story.source, formatRelativeTime(story.pubDate)]
+                                        .filter(Boolean)
+                                        .join('  ·  ')}
+                                </div>
+                                <h1 className="display-title">{story.title}</h1>
+                                {story.description && (
+                                    <p
+                                        ref={i === index ? descriptionRef : undefined}
+                                        className={`display-description${i === index && fadeDescription ? ' display-description--fade-bottom' : ''}`}
+                                    >
+                                        {story.description}
+                                    </p>
+                                )}
                             </div>
-                            <h1 className="display-title">{story.title}</h1>
-                            {story.description && <p className="display-description">{story.description}</p>}
                         </div>
                     </article>
                 );
