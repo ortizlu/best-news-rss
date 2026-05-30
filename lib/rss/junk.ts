@@ -23,6 +23,15 @@ const TENNIS_RESULT_LINE =
 
 const SET_SCORE = /\d-\d\s*\(\d+\)/;
 
+/** Local news daily recap roundups (ALXnow, etc.). */
+const DAILY_DEBRIEF_TITLE = /\bdaily\s+debrief\b/i;
+
+/** Individual lottery draw result posts (WTOP syndication). */
+const LOTTERY_DRAW_TITLE = /\bwinning\s+numbers\s+drawn\s+in\b/i;
+
+/** Tennis tournament scoreboard roundups (French Open, etc.). */
+const FRENCH_OPEN_TITLE = /\bfrench\s+open\b/i;
+
 /** AP/Zacks automated earnings blurbs syndicated as news. */
 const EARNINGS_SNAPSHOT_TITLE =
   /\b(?:earnings|revenue)\s+snapshot\b|\bfiscal\s+q[1-4]\s+earnings\b/i;
@@ -61,6 +70,10 @@ export function isLowValueStory(title: string, description?: string): boolean {
 
   // Pure scoreboard copy with no narrative hook.
   if (countMatches(body, TENNIS_RESULT_LINE) >= 3) return true;
+
+  if (DAILY_DEBRIEF_TITLE.test(t)) return true;
+  if (LOTTERY_DRAW_TITLE.test(t)) return true;
+  if (FRENCH_OPEN_TITLE.test(t)) return true;
 
   if (EARNINGS_SNAPSHOT_TITLE.test(t)) return true;
   if (AUTOMATED_FINANCE_BODY.test(combined)) return true;
