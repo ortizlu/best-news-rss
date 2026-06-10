@@ -13,6 +13,37 @@ describe("isLowValueStory", () => {
       expect(isLowValueStory("   ")).toBe(true);
     });
 
+    it("drops stories with no body text", () => {
+      expect(
+        isLowValueStory(
+          "Pope Leo XIV’s visit to mainland Spain and the Canary Islands, in photos",
+        ),
+      ).toBe(true);
+      expect(
+        isLowValueStory("City council approves new park", undefined),
+      ).toBe(true);
+      expect(isLowValueStory("City council approves new park", "   ")).toBe(
+        true,
+      );
+    });
+
+    it("drops AP photo galleries even when a short intro exists", () => {
+      expect(
+        isLowValueStory(
+          "Pope Leo XIV’s visit to mainland Spain and the Canary Islands, in photos",
+          "Pope Leo XIV's weeklong visit to Spain has brought him to a once-staunchly Catholic country.",
+          "https://apnews.com/photo-gallery/pope-leo-xiv-s-visit-mainland-spain-canary-islands-photos-2625a7639059485697c70e78c104e1a8",
+        ),
+      ).toBe(true);
+
+      expect(
+        isLowValueStory(
+          "Wildfire smoke fills the sky over Los Angeles, in photos",
+          "A photo gallery curated by AP photo editors.",
+        ),
+      ).toBe(true);
+    });
+
     it("drops WTOP data-table titles", () => {
       expect(isLowValueStory("Betting Line")).toBe(true);
       expect(isLowValueStory("Sports Betting Line")).toBe(true);

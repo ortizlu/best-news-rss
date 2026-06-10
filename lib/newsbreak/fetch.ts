@@ -94,7 +94,7 @@ export async function fetchAndCleanNewsBreakFeed(
                 source: publisher || channelTitle
             };
         })
-        .filter(item => !isLowValueStory(item.title, item.description))
+        .filter(item => !isLowValueStory(item.title, item.description, item.link))
         .filter(item => !dropSports || !isSportsArticle(item.link));
 
     return {

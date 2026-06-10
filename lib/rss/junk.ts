@@ -36,6 +36,10 @@ const FRENCH_OPEN_TITLE = /\bfrench\s+open\b/i;
 const EARNINGS_SNAPSHOT_TITLE =
   /\b(?:earnings|revenue)\s+snapshot\b|\bfiscal\s+q[1-4]\s+earnings\b/i;
 
+/** AP and others publish image-only galleries with little or no article text. */
+const PHOTO_GALLERY_URL = /\/photo-gallery(?:\/|$)/i;
+const PHOTO_GALLERY_TITLE = /\bin photos\b/i;
+
 const AUTOMATED_FINANCE_BODY =
   /\b(?:generated|produced)\s+by\s+automated\s+insights\b|\bautomatedinsights\.com\b|\bzacks\s+investment\s+research\b|\baccess\s+a\s+zacks\s+stock\s+report\b/i;
 
@@ -43,13 +47,26 @@ function countMatches(text: string, re: RegExp): number {
   return [...text.matchAll(re)].length;
 }
 
+export function hasStoryBody(description?: string): boolean {
+  return Boolean(description?.trim());
+}
+
 /**
  * Drop syndicated filler (betting lines, odds grids, sportsbook ads, score lists)
  * that some feeds mix into their main RSS stream.
  */
-export function isLowValueStory(title: string, description?: string): boolean {
+export function isLowValueStory(
+  title: string,
+  description?: string,
+  link?: string,
+): boolean {
   const t = title.trim();
   if (!t) return true;
+
+  if (!hasStoryBody(description)) return true;
+
+  if (link && PHOTO_GALLERY_URL.test(link)) return true;
+  if (PHOTO_GALLERY_TITLE.test(t)) return true;
 
   if (JUNK_TITLE.test(t)) return true;
 

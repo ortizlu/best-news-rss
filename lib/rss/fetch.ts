@@ -102,7 +102,7 @@ function filterFeedItems(
     excludeSports = false,
 ): CleanedItem[] {
     return items.filter(item => {
-        if (isLowValueStory(item.title, item.description)) return false;
+        if (isLowValueStory(item.title, item.description, item.link)) return false;
         if (excludeSports && isSportsArticle(item.link)) return false;
         if (!englishOnly) return true;
         const sample = `${item.title} ${item.description ?? ''}`;

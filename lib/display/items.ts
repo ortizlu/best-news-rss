@@ -35,11 +35,13 @@ export async function getDisplayStories(
         excludeSports: true,
     };
 
-    const merged = await fetchAndMergeFeeds(feeds, options, maxItems);
+    // Over-fetch so filtering out body-less items still fills the rotation.
+    const fetchLimit = Math.min(maxItems * 4, 120);
+    const merged = await fetchAndMergeFeeds(feeds, options, fetchLimit);
 
     const sorted = [...merged.items].sort((a, b) => pubDateMs(b.pubDate) - pubDateMs(a.pubDate));
 
-    const stories: DisplayStory[] = sorted.map(item => ({
+    const stories: DisplayStory[] = sorted.slice(0, maxItems).map(item => ({
         title: item.title,
         description: item.description,
         source: item.source,
