@@ -30,6 +30,7 @@ type Props = {
     stories: DisplayStory[];
     intervalSeconds: number;
     showProgress: boolean;
+    showPhotos: boolean;
 };
 
 type StoryTextProps = {
@@ -68,7 +69,7 @@ function StoryText({
     );
 }
 
-export default function DisplayPlayer({ stories, intervalSeconds, showProgress }: Props) {
+export default function DisplayPlayer({ stories, intervalSeconds, showProgress, showPhotos }: Props) {
     const [index, setIndex] = useState(0);
     const [progress, setProgress] = useState(0);
     const [brokenImages, setBrokenImages] = useState<Set<number>>(new Set());
@@ -178,7 +179,7 @@ export default function DisplayPlayer({ stories, intervalSeconds, showProgress }
                 <div className="display-progress" style={{ width: `${Math.min(progress, 1) * 100}%` }} aria-hidden />
             )}
             {playable.map((story, i) => {
-                const showImage = story.imageUrl && !brokenImages.has(i);
+                const showImage = showPhotos && story.imageUrl && !brokenImages.has(i);
                 return (
                     <article
                         key={`${story.title}-${i}`}

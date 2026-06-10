@@ -18,14 +18,17 @@ function pubDateMs(pubDate?: string): number {
     return Number.isNaN(ms) ? 0 : ms;
 }
 
-export async function getDisplayStories(maxItems = 30): Promise<DisplayStory[]> {
+export async function getDisplayStories(
+    maxItems = 30,
+    { includeImages = true }: { includeImages?: boolean } = {},
+): Promise<DisplayStory[]> {
     const feeds = await loadFeeds();
     if (feeds.length === 0) return [];
 
     const options = {
         ...DEFAULT_CLEAN_OPTIONS,
         includeItemLinks: true,
-        includeImages: true,
+        includeImages,
         maxDescriptionLength: 1000,
         maxParagraphs: 8,
         dropFullContent: false,
@@ -44,6 +47,8 @@ export async function getDisplayStories(maxItems = 30): Promise<DisplayStory[]> 
         imageUrl: item.imageUrl,
         pubDate: item.pubDate
     }));
+
+    if (!includeImages) return stories;
 
     // No RSS image → use the article page's og:image (hero photo).
     return enrichStoriesWithOgImages(stories);

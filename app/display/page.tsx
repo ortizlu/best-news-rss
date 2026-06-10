@@ -11,11 +11,15 @@ export const dynamic = "force-dynamic";
 export const revalidate = 300;
 
 type PageProps = {
-  searchParams: Promise<{ seconds?: string; progress?: string }>;
+  searchParams: Promise<{ seconds?: string; progress?: string; photos?: string }>;
 };
 
 function flag(value: string | undefined): boolean {
   return value === "1" || value === "true";
+}
+
+function photosEnabled(value: string | undefined): boolean {
+  return value !== "0" && value !== "false";
 }
 
 export default async function DisplayPage({ searchParams }: PageProps) {
@@ -24,14 +28,16 @@ export default async function DisplayPage({ searchParams }: PageProps) {
   const intervalSeconds =
     Number.isFinite(parsed) && parsed >= 5 && parsed <= 120 ? parsed : 14;
   const showProgress = flag(params.progress);
+  const showPhotos = photosEnabled(params.photos);
 
-  const stories = await getDisplayStories(30);
+  const stories = await getDisplayStories(30, { includeImages: showPhotos });
 
   return (
     <DisplayPlayer
       stories={stories}
       intervalSeconds={intervalSeconds}
       showProgress={showProgress}
+      showPhotos={showPhotos}
     />
   );
 }
