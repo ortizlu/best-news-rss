@@ -1,0 +1,35 @@
+---
+description: Architecture overview, deployment context, and key data flow for best-news-rss
+alwaysApply: true
+---
+
+# best-news-rss Overview
+
+Next.js app deployed on **Vercel** that aggregates RSS feeds, cleans them, and serves them to Dakboard (a smart display dashboard).
+
+## Key Files
+
+| Path | Purpose |
+|------|---------|
+| `data/feeds.json` | Source of truth for all feed sources (id, name, url) |
+| `lib/feeds-store.ts` | Reads/writes feeds.json; writes **fail on Vercel** (read-only FS at runtime) |
+| `lib/rss/fetch.ts` | Fetches and cleans individual feeds |
+| `lib/rss/merge.ts` | Merges all feeds into one deduplicated, date-sorted list |
+| `lib/display/items.ts` | Powers the display widget — different options than RSS routes |
+| `app/rss/all/route.ts` | `/rss/all` — merged RSS feed for Dakboard (50 items, fresh per request) |
+| `app/api/display/route.ts` | `/api/display` — JSON for the display widget (30 items, cached 5 min) |
+
+## Adding Feeds
+
+**Always edit `data/feeds.json` and commit** — the UI's POST `/api/feeds` tries to write to disk and fails silently on Vercel with a 503. The deployed app only reads what was in the repo at deploy time.
+
+## Two Output Paths with Different Options
+
+| | `/rss/all` and `/rss/[id]` | `/api/display` (widget) |
+|--|--|--|
+| `maxParagraphs` | 1 (lead sentence only) | 8 (full article body) |
+| `dropFullContent` | true | false |
+| `excludeSports` | false | true (hardcoded) |
+| Caching | fresh per request | ISR, 5-min cache |
+
+This difference in `excludeSports` is the most common source of bugs: something can appear in `/rss/all` but be silently dropped from the display.

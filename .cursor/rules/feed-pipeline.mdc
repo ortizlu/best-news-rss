@@ -1,0 +1,46 @@
+---
+description: Feed cleaning pipeline gotchas — how items get filtered, why feeds silently disappear, rss-parser edge cases
+globs: lib/rss/*.ts,lib/display/*.ts,app/api/display/**,app/rss/**
+alwaysApply: false
+---
+
+# Feed Pipeline Gotchas
+
+## Silent Feed Drops via Promise.allSettled
+
+`fetchAndMergeFeeds` uses `Promise.allSettled` — if `fetchAndCleanFeed` throws for any feed, that feed is **silently dropped** with no error surfaced to the caller or the user.
+
+**Debugging a missing feed:** always test it in isolation first:
+```
+/rss/[feed-id]   ← tests fetchAndCleanFeed with default options
+/api/display     ← tests with display options (maxParagraphs:8, excludeSports:true)
+```
+If a feed appears in `/rss/[id]` but not in the display, the bug is in the display-specific code path (most likely the sports filter or description extraction).
+
+## rss-parser Category Format
+
+Some RSS feeds (e.g. Fox News) use `<category domain="...">value</category>`. rss-parser parses these as objects `{ _: 'value', $: { domain: '...' } }` instead of plain strings.
+
+`normalizeCategories` in `lib/rss/sports.ts` handles this. If you add logic elsewhere that reads `item.categories`, guard against non-string values.
+
+## The Sports Filter Short-Circuit
+
+```typescript
+.filter(item => !dropSports || !isSportsArticle(item.link, item.categories))
+```
+
+When `dropSports = false`, `isSportsArticle` is **never called** (short-circuit). Any bug inside `isSportsArticle` (including category object crashes) is invisible in the `/rss/all` path but fatal in the display path where `dropSports = true`.
+
+## isLowValueStory — The Primary Quality Gate
+
+Items are filtered out if `description` is empty after extraction. With display options (`maxParagraphs: 8`), description comes from `content:encoded` via `extractArticleText`. With default options (`maxParagraphs: 1, dropFullContent: true`), it comes from the plain `<description>` field.
+
+If a feed works in `/rss/[id]` but produces no stories in the display, check that `extractArticleText` returns non-empty text for its `content:encoded` HTML.
+
+## excludeSports is Not a Typed CleanOptions Field
+
+`excludeSports` is set on the options object in `getDisplayStories` as `excludeSports: true`, but `CleanOptions` doesn't define it. In `fetchAndCleanFeed`:
+```typescript
+const dropSports = excludeSports || options.excludeSports === true;
+```
+The typed `excludeSports` parameter comes from `source.excludeSports` in `feeds.json`. The `options.excludeSports` duck-typing is intentional — it lets `getDisplayStories` pass it through without changing the function signature.
