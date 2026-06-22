@@ -6,7 +6,21 @@ const SPORTS_CATEGORY = /\bsports?\b/i;
 function normalizeCategories(categories: unknown): string[] {
   if (!categories) return [];
   const list = Array.isArray(categories) ? categories : [categories];
-  return list.map(String);
+  return list.flatMap((c: unknown) => {
+    if (typeof c === 'string') return [c];
+    // rss-parser returns { _: 'text', $: { domain: '...' } } for <category domain="..."> elements
+    if (c && typeof c === 'object') {
+      const obj = c as Record<string, unknown>;
+      if (typeof obj._ === 'string') return [obj._];
+      if (typeof obj.text === 'string') return [obj.text];
+    }
+    try {
+      const s = String(c);
+      return s ? [s] : [];
+    } catch {
+      return [];
+    }
+  });
 }
 
 /** True when the item is sports-section copy (URL path or RSS category). */
