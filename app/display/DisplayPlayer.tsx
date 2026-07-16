@@ -31,6 +31,7 @@ type Props = {
     intervalSeconds: number;
     showProgress: boolean;
     showPhotos: boolean;
+    transparent: boolean;
 };
 
 type StoryTextProps = {
@@ -69,7 +70,13 @@ function StoryText({
     );
 }
 
-export default function DisplayPlayer({ stories, intervalSeconds, showProgress, showPhotos }: Props) {
+export default function DisplayPlayer({
+    stories,
+    intervalSeconds,
+    showProgress,
+    showPhotos,
+    transparent
+}: Props) {
     const [index, setIndex] = useState(0);
     const [progress, setProgress] = useState(0);
     const [brokenImages, setBrokenImages] = useState<Set<number>>(new Set());
@@ -163,9 +170,21 @@ export default function DisplayPlayer({ stories, intervalSeconds, showProgress, 
         return () => clearInterval(id);
     }, []);
 
+    useEffect(() => {
+        if (!transparent) return;
+        document.documentElement.classList.add('display-transparent');
+        document.body.classList.add('display-transparent');
+        return () => {
+            document.documentElement.classList.remove('display-transparent');
+            document.body.classList.remove('display-transparent');
+        };
+    }, [transparent]);
+
+    const pageClassName = transparent ? 'display-page display-page--transparent' : 'display-page';
+
     if (playable.length === 0) {
         return (
-            <div className="display-page">
+            <div className={pageClassName}>
                 <div className="display-empty">
                     No stories with content right now. Check data/feeds.json and redeploy.
                 </div>
@@ -174,28 +193,31 @@ export default function DisplayPlayer({ stories, intervalSeconds, showProgress, 
     }
 
     return (
-        <div className="display-page">
+        <div className={pageClassName}>
             {showProgress && (
                 <div className="display-progress" style={{ width: `${Math.min(progress, 1) * 100}%` }} aria-hidden />
             )}
             {playable.map((story, i) => {
-                const showImage = showPhotos && story.imageUrl && !brokenImages.has(i);
+                const showImage = !transparent && showPhotos && story.imageUrl && !brokenImages.has(i);
                 return (
                     <article
                         key={`${story.title}-${i}`}
                         className={`display-slide${i === index ? ' active' : ''}`}
                         aria-hidden={i !== index}
                     >
-                        <div
-                            className="display-bg"
-                            style={
-                                showImage
-                                    ? { backgroundImage: `url("${story.imageUrl}")` }
-                                    : {
-                                          backgroundImage: 'linear-gradient(135deg, #000 0%, #000 55%, #000 100%)'
-                                      }
-                            }
-                        />
+                        {!transparent && (
+                            <div
+                                className="display-bg"
+                                style={
+                                    showImage
+                                        ? { backgroundImage: `url("${story.imageUrl}")` }
+                                        : {
+                                              backgroundImage:
+                                                  'linear-gradient(135deg, #000 0%, #000 55%, #000 100%)'
+                                          }
+                                }
+                            />
+                        )}
                         {showImage && (
                             <img
                                 src={story.imageUrl}
