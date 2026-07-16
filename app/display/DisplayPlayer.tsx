@@ -32,6 +32,7 @@ type Props = {
     showProgress: boolean;
     showPhotos: boolean;
     transparent: boolean;
+    textAlign: 'left' | 'right';
 };
 
 type StoryTextProps = {
@@ -75,7 +76,8 @@ export default function DisplayPlayer({
     intervalSeconds,
     showProgress,
     showPhotos,
-    transparent
+    transparent,
+    textAlign
 }: Props) {
     const [index, setIndex] = useState(0);
     const [progress, setProgress] = useState(0);
@@ -180,7 +182,13 @@ export default function DisplayPlayer({
         };
     }, [transparent]);
 
-    const pageClassName = transparent ? 'display-page display-page--transparent' : 'display-page';
+    const pageClassName = [
+        'display-page',
+        transparent && 'display-page--transparent',
+        textAlign === 'right' && 'display-page--align-right'
+    ]
+        .filter(Boolean)
+        .join(' ');
 
     if (playable.length === 0) {
         return (

@@ -19,6 +19,15 @@ body.display-transparent {
     background: transparent;
 }
 
+.display-page--align-right .display-content {
+    align-items: flex-end;
+    text-align: right;
+}
+
+.display-page--align-right .display-article-link {
+    align-items: flex-end;
+}
+
 .display-slide {
     position: absolute;
     inset: 0;

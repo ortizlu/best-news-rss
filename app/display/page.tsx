@@ -16,6 +16,7 @@ type PageProps = {
     progress?: string;
     photos?: string;
     transparent?: string;
+    align?: string;
   }>;
 };
 
@@ -27,6 +28,10 @@ function photosEnabled(value: string | undefined): boolean {
   return value !== "0" && value !== "false";
 }
 
+function textAlign(value: string | undefined): "left" | "right" {
+  return value === "right" ? "right" : "left";
+}
+
 export default async function DisplayPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const parsed = Number(params.seconds);
@@ -35,6 +40,7 @@ export default async function DisplayPage({ searchParams }: PageProps) {
   const showProgress = flag(params.progress);
   const showPhotos = photosEnabled(params.photos);
   const transparent = flag(params.transparent);
+  const align = textAlign(params.align);
 
   const stories = await getDisplayStories(30, { includeImages: showPhotos });
 
@@ -45,6 +51,7 @@ export default async function DisplayPage({ searchParams }: PageProps) {
       showProgress={showProgress}
       showPhotos={showPhotos}
       transparent={transparent}
+      textAlign={align}
     />
   );
 }
