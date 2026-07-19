@@ -32,6 +32,7 @@ type Props = {
     showProgress: boolean;
     showPhotos: boolean;
     transparent: boolean;
+    iosStyle: boolean;
     textAlign: 'left' | 'right';
 };
 
@@ -77,6 +78,7 @@ export default function DisplayPlayer({
     showProgress,
     showPhotos,
     transparent,
+    iosStyle,
     textAlign
 }: Props) {
     const [index, setIndex] = useState(0);
@@ -185,6 +187,7 @@ export default function DisplayPlayer({
     const pageClassName = [
         'display-page',
         transparent && 'display-page--transparent',
+        iosStyle && 'display-page--ios',
         textAlign === 'right' && 'display-page--align-right'
     ]
         .filter(Boolean)
@@ -206,23 +209,31 @@ export default function DisplayPlayer({
                 <div className="display-progress" style={{ width: `${Math.min(progress, 1) * 100}%` }} aria-hidden />
             )}
             {playable.map((story, i) => {
-                const showImage = !transparent && showPhotos && story.imageUrl && !brokenImages.has(i);
+                const showImage = showPhotos && story.imageUrl && !brokenImages.has(i);
+                const renderSlideBg = iosStyle || !transparent;
                 return (
                     <article
                         key={`${story.title}-${i}`}
                         className={`display-slide${i === index ? ' active' : ''}`}
                         aria-hidden={i !== index}
                     >
-                        {!transparent && (
+                        {renderSlideBg && (
                             <div
-                                className="display-bg"
+                                className={[
+                                    'display-bg',
+                                    iosStyle && !showImage && 'display-bg--frost'
+                                ]
+                                    .filter(Boolean)
+                                    .join(' ')}
                                 style={
                                     showImage
                                         ? { backgroundImage: `url("${story.imageUrl}")` }
-                                        : {
-                                              backgroundImage:
-                                                  'linear-gradient(135deg, #000 0%, #000 55%, #000 100%)'
-                                          }
+                                        : iosStyle
+                                          ? undefined
+                                          : {
+                                                backgroundImage:
+                                                    'linear-gradient(135deg, #000 0%, #000 55%, #000 100%)'
+                                            }
                                 }
                             />
                         )}
@@ -234,7 +245,16 @@ export default function DisplayPlayer({
                                 onError={() => setBrokenImages(prev => new Set(prev).add(i))}
                             />
                         )}
-                        {showImage && <div className="display-overlay" />}
+                        {showImage && (
+                            <div
+                                className={[
+                                    'display-overlay',
+                                    iosStyle && 'display-overlay--frost'
+                                ]
+                                    .filter(Boolean)
+                                    .join(' ')}
+                            />
+                        )}
                         <div className="display-content" ref={i === index ? contentRef : undefined}>
                             {story.link ? (
                                 <a

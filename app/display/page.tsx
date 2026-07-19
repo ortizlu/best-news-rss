@@ -16,6 +16,7 @@ type PageProps = {
     progress?: string;
     photos?: string;
     transparent?: string;
+    ios?: string;
     align?: string;
   }>;
 };
@@ -40,6 +41,7 @@ export default async function DisplayPage({ searchParams }: PageProps) {
   const showProgress = flag(params.progress);
   const showPhotos = photosEnabled(params.photos);
   const transparent = flag(params.transparent);
+  const iosStyle = flag(params.ios);
   const align = textAlign(params.align);
 
   const stories = await getDisplayStories(30, { includeImages: showPhotos });
@@ -51,6 +53,7 @@ export default async function DisplayPage({ searchParams }: PageProps) {
       showProgress={showProgress}
       showPhotos={showPhotos}
       transparent={transparent}
+      iosStyle={iosStyle}
       textAlign={align}
     />
   );
