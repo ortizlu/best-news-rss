@@ -227,7 +227,7 @@ body.display-transparent {
 }
 
 .display-page--ios .display-bg {
-    filter: saturate(0.9) brightness(0.92);
+    filter: saturate(1.05) brightness(1);
 }
 
 .display-page--ios .display-bg--frost {
@@ -244,15 +244,16 @@ body.display-transparent {
 }
 
 .display-page--ios .display-overlay--frost {
+    /* Frost via tint + bottom vignette — no backdrop blur so the photo stays sharp. */
     background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 38%),
         linear-gradient(
             180deg,
-            rgba(255, 255, 255, 0.14) 0%,
-            rgba(255, 255, 255, 0.08) 42%,
-            rgba(18, 20, 24, 0.28) 100%
+            rgba(255, 255, 255, 0.04) 0%,
+            transparent 28%,
+            rgba(8, 10, 14, 0.08) 58%,
+            rgba(8, 10, 14, 0.42) 100%
         );
-    backdrop-filter: blur(18px) saturate(1.15);
-    -webkit-backdrop-filter: blur(18px) saturate(1.15);
 }
 
 .display-page--ios .display-meta {
