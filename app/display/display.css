@@ -227,7 +227,7 @@ body.display-transparent {
 }
 
 .display-page--ios .display-bg {
-    filter: saturate(1.05) brightness(1);
+    filter: saturate(1) brightness(0.9);
 }
 
 .display-page--ios .display-bg--frost {
@@ -244,33 +244,38 @@ body.display-transparent {
 }
 
 .display-page--ios .display-overlay--frost {
-    /* Frost via tint + bottom vignette — no backdrop blur so the photo stays sharp. */
+    /* Frost sheen + darker center band for centered text on bright photos. */
     background:
-        linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 38%),
+        linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 34%),
         linear-gradient(
             180deg,
-            rgba(255, 255, 255, 0.04) 0%,
-            transparent 28%,
-            rgba(8, 10, 14, 0.08) 58%,
-            rgba(8, 10, 14, 0.42) 100%
+            rgba(10, 12, 18, 0.32) 0%,
+            rgba(10, 12, 18, 0.5) 34%,
+            rgba(10, 12, 18, 0.62) 68%,
+            rgba(10, 12, 18, 0.72) 100%
         );
 }
 
 .display-page--ios .display-meta {
-    color: rgba(255, 255, 255, 0.68);
+    color: rgba(255, 255, 255, 0.78);
     letter-spacing: 0.04em;
     font-weight: 500;
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.55);
 }
 
 .display-page--ios .display-title {
     font-weight: 600;
     letter-spacing: -0.02em;
-    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.35);
+    text-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.85),
+        0 2px 14px rgba(0, 0, 0, 0.55);
 }
 
 .display-page--ios .display-description {
-    color: rgba(255, 255, 255, 0.88);
-    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.3);
+    color: rgba(255, 255, 255, 0.92);
+    text-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.8),
+        0 1px 10px rgba(0, 0, 0, 0.5);
 }
 
 .display-page--ios .display-progress {
