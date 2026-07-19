@@ -14,7 +14,7 @@ body.display-transparent {
     font-family: 'IBM Plex Sans', system-ui, sans-serif;
     container-type: size;
     /* Breathing room so long descriptions don't end flush with the widget edge. */
-    --description-bottom-inset: clamp(12px, 3cqh, 56px);
+    --description-bottom-inset: clamp(16px, 4cqh, 68px);
 }
 
 .display-page--transparent {
