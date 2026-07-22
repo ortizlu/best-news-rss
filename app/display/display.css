@@ -53,6 +53,11 @@ body.display-transparent {
     filter: saturate(0.65) brightness(0.7);
 }
 
+.display-bg.display-bg--soft-blur {
+    filter: blur(12px) saturate(0.88) brightness(0.82);
+    transform: scale(1.08);
+}
+
 .display-overlay {
     position: absolute;
     inset: 0;
@@ -228,6 +233,11 @@ body.display-transparent {
 
 .display-page--ios .display-bg {
     filter: saturate(1) brightness(0.9);
+}
+
+.display-page--ios .display-bg.display-bg--soft-blur {
+    filter: blur(12px) saturate(0.95) brightness(0.88);
+    transform: scale(1.08);
 }
 
 .display-page--ios .display-bg--frost {

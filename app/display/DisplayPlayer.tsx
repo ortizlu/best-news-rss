@@ -221,7 +221,8 @@ export default function DisplayPlayer({
                             <div
                                 className={[
                                     'display-bg',
-                                    iosStyle && !showImage && 'display-bg--frost'
+                                    iosStyle && !showImage && 'display-bg--frost',
+                                    showImage && story.imageBlur && 'display-bg--soft-blur'
                                 ]
                                     .filter(Boolean)
                                     .join(' ')}

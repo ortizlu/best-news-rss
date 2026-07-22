@@ -1,3 +1,4 @@
+import { applyDisplayImageOverrides } from './story-image';
 import { loadFeeds } from '../feeds-store';
 import { DEFAULT_CLEAN_OPTIONS } from '../rss/clean';
 import { enrichStoriesWithOgImages } from '../rss/og-image';
@@ -9,6 +10,7 @@ export type DisplayStory = {
     source?: string;
     link?: string;
     imageUrl?: string;
+    imageBlur?: boolean;
     pubDate?: string;
 };
 
@@ -53,5 +55,6 @@ export async function getDisplayStories(
     if (!includeImages) return stories;
 
     // No RSS image → use the article page's og:image (hero photo).
-    return enrichStoriesWithOgImages(stories);
+    const enriched = await enrichStoriesWithOgImages(stories);
+    return enriched.map(applyDisplayImageOverrides);
 }
