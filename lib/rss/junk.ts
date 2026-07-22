@@ -1,6 +1,11 @@
 /** Titles that are data tables, not news stories (common on WTOP). */
 const JUNK_TITLE =
-  /^(?:sports\s+)?betting\s+line$|^lottery(?:\s+numbers)?$|^stock\s+quotes?$/i;
+  /^(?:sports\s+)?betting\s+line$|^lottery(?:\s+numbers)?$|^stock\s+quotes?$|^wholesale\s+cash\s+prices$|^cash\s+prices$/i;
+
+const WEEKDAY =
+  /\b(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/gi;
+const WEEKDAY_WORD =
+  /^(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday)$/i;
 
 const BETTING_ODDS_GRID =
   /\bFAVORITE\s+LINE\b[\s\S]{0,400}\bUNDERDOG\s+LINE\b/i;
@@ -47,6 +52,40 @@ function countMatches(text: string, re: RegExp): number {
   return [...text.matchAll(re)].length;
 }
 
+function normalizeBlurb(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/** One-line market/data rows where the body just repeats the title (+ weekday). */
+function isRedundantDataBlurb(title: string, description?: string): boolean {
+  const body = description?.trim() ?? "";
+  if (!body || body.length > 100) return false;
+
+  const words = body.split(/\s+/);
+  if (words.length > 8) return false;
+
+  const t = normalizeBlurb(title);
+  const b = normalizeBlurb(body);
+  if (!t || t.length < 4) return false;
+
+  const bWithoutDay = b.replace(WEEKDAY, "").replace(/\s+/g, " ").trim();
+  if (bWithoutDay === t || b.startsWith(t) || t.startsWith(bWithoutDay)) {
+    return true;
+  }
+
+  const titleWords = new Set(t.split(" ").filter(Boolean));
+  const bodyWords = b
+    .split(" ")
+    .filter((w) => w && !WEEKDAY_WORD.test(w));
+  return (
+    bodyWords.length >= 2 && bodyWords.every((word) => titleWords.has(word))
+  );
+}
+
 export function hasStoryBody(description?: string): boolean {
   return Boolean(description?.trim());
 }
@@ -69,6 +108,7 @@ export function isLowValueStory(
   if (PHOTO_GALLERY_TITLE.test(t)) return true;
 
   if (JUNK_TITLE.test(t)) return true;
+  if (isRedundantDataBlurb(t, description)) return true;
 
   const combined = `${t}\n${description ?? ""}`;
   const body = description ?? "";

@@ -50,6 +50,14 @@ describe("isLowValueStory", () => {
       expect(isLowValueStory("Lottery")).toBe(true);
       expect(isLowValueStory("Lottery numbers")).toBe(true);
       expect(isLowValueStory("Stock quotes")).toBe(true);
+      expect(isLowValueStory("Wholesale Cash Prices")).toBe(true);
+      expect(
+        isLowValueStory(
+          "Wholesale Cash Prices",
+          "Wholesale cash prices Wednesday",
+          "https://wtop.com/news/2026/07/wholesale-cash-prices-34/",
+        ),
+      ).toBe(true);
     });
 
     it("drops WTOP lottery draw result posts", () => {
