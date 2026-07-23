@@ -12,6 +12,8 @@ import type { DisplayStory } from '@/lib/display/items';
 import { fitDescriptionText } from '@/lib/display/truncate-description';
 import './display.css';
 
+const STORY_REFRESH_MS = 5 * 60 * 1000;
+
 function formatRelativeTime(pubDate?: string): string {
     if (!pubDate) return '';
     const ms = Date.parse(pubDate);
@@ -24,6 +26,19 @@ function formatRelativeTime(pubDate?: string): string {
     if (diffHr < 48) return `${diffHr} hr ago`;
     const diffDay = Math.round(diffHr / 24);
     return `${diffDay} day${diffDay === 1 ? '' : 's'} ago`;
+}
+
+function storyKey(story: DisplayStory): string {
+    return story.link ?? story.title;
+}
+
+/** Active slide plus neighbors for crossfade — not the full deck. */
+function visibleSlideIndices(active: number, total: number): number[] {
+    if (total <= 0) return [];
+    if (total === 1) return [0];
+    const prev = (active - 1 + total) % total;
+    const next = (active + 1) % total;
+    return [...new Set([prev, active, next])].sort((a, b) => a - b);
 }
 
 type Props = {
@@ -72,8 +87,73 @@ function StoryText({
     );
 }
 
+type SlideBackgroundProps = {
+    story: DisplayStory;
+    showImage: boolean;
+    iosStyle: boolean;
+    transparent: boolean;
+    onImageError: () => void;
+};
+
+function SlideBackground({
+    story,
+    showImage,
+    iosStyle,
+    transparent,
+    onImageError
+}: SlideBackgroundProps) {
+    const renderSlideBg = iosStyle || !transparent;
+    if (!renderSlideBg) return null;
+
+    if (showImage && story.imageUrl) {
+        return (
+            <>
+                <img
+                    className={[
+                        'display-bg',
+                        story.imageBlur && 'display-bg--soft-blur'
+                    ]
+                        .filter(Boolean)
+                        .join(' ')}
+                    src={story.imageUrl}
+                    alt=""
+                    decoding="async"
+                    onError={onImageError}
+                />
+                <div
+                    className={[
+                        'display-overlay',
+                        iosStyle && 'display-overlay--frost'
+                    ]
+                        .filter(Boolean)
+                        .join(' ')}
+                />
+            </>
+        );
+    }
+
+    return (
+        <div
+            className={[
+                'display-bg',
+                iosStyle && 'display-bg--frost'
+            ]
+                .filter(Boolean)
+                .join(' ')}
+            style={
+                iosStyle
+                    ? undefined
+                    : {
+                          backgroundImage:
+                              'linear-gradient(135deg, #000 0%, #000 55%, #000 100%)'
+                      }
+            }
+        />
+    );
+}
+
 export default function DisplayPlayer({
-    stories,
+    stories: initialStories,
     intervalSeconds,
     showProgress,
     showPhotos,
@@ -81,9 +161,10 @@ export default function DisplayPlayer({
     iosStyle,
     textAlign
 }: Props) {
+    const [playable, setPlayable] = useState(initialStories);
     const [index, setIndex] = useState(0);
     const [progress, setProgress] = useState(0);
-    const [brokenImages, setBrokenImages] = useState<Set<number>>(new Set());
+    const [brokenImageKeys, setBrokenImageKeys] = useState<Set<string>>(() => new Set());
     const [descriptionText, setDescriptionText] = useState<string | undefined>();
     const textStackRef = useRef<HTMLDivElement>(null);
     const contentRef = useRef<HTMLDivElement>(null);
@@ -91,12 +172,17 @@ export default function DisplayPlayer({
     const titleRef = useRef<HTMLHeadingElement>(null);
     const descriptionRef = useRef<HTMLParagraphElement>(null);
 
-    const playable = useMemo(() => {
-        if (stories.length === 0) return [];
-        return stories;
-    }, [stories]);
+    useEffect(() => {
+        setPlayable(initialStories);
+        setIndex(i => (initialStories.length ? Math.min(i, initialStories.length - 1) : 0));
+    }, [initialStories]);
 
     const activeStory = playable[index];
+
+    const slideIndices = useMemo(
+        () => visibleSlideIndices(index, playable.length),
+        [index, playable.length]
+    );
 
     const advance = useCallback(() => {
         setIndex(i => (playable.length ? (i + 1) % playable.length : 0));
@@ -166,13 +252,30 @@ export default function DisplayPlayer({
         };
     }, [index, activeStory?.description]);
 
+    /* Soft refresh — fetch new stories without reloading the page (Safari-friendly). */
     useEffect(() => {
-        const refreshMs = 5 * 60 * 1000;
-        const id = window.setInterval(() => {
-            window.location.reload();
-        }, refreshMs);
+        const refreshStories = async () => {
+            try {
+                const params = new URLSearchParams({
+                    maxItems: '30',
+                    includeImages: showPhotos ? '1' : '0'
+                });
+                const res = await fetch(`/api/display?${params.toString()}`, {
+                    cache: 'no-store'
+                });
+                if (!res.ok) return;
+                const data = (await res.json()) as { stories?: DisplayStory[] };
+                if (!Array.isArray(data.stories) || data.stories.length === 0) return;
+                setPlayable(data.stories);
+                setIndex(i => Math.min(i, data.stories!.length - 1));
+            } catch {
+                /* ignore network blips on wall displays */
+            }
+        };
+
+        const id = window.setInterval(refreshStories, STORY_REFRESH_MS);
         return () => clearInterval(id);
-    }, []);
+    }, [showPhotos]);
 
     useEffect(() => {
         if (!transparent) return;
@@ -184,10 +287,21 @@ export default function DisplayPlayer({
         };
     }, [transparent]);
 
+    const markImageBroken = useCallback((story: DisplayStory) => {
+        const key = storyKey(story);
+        setBrokenImageKeys(prev => {
+            if (prev.has(key)) return prev;
+            const next = new Set(prev);
+            next.add(key);
+            return next;
+        });
+    }, []);
+
     const pageClassName = [
         'display-page',
         transparent && 'display-page--transparent',
         iosStyle && 'display-page--ios',
+        iosStyle && showPhotos && 'display-page--has-photos',
         textAlign === 'right' && 'display-page--align-right'
     ]
         .filter(Boolean)
@@ -208,55 +322,27 @@ export default function DisplayPlayer({
             {showProgress && (
                 <div className="display-progress" style={{ width: `${Math.min(progress, 1) * 100}%` }} aria-hidden />
             )}
-            {playable.map((story, i) => {
-                const showImage = showPhotos && story.imageUrl && !brokenImages.has(i);
-                const renderSlideBg = iosStyle || !transparent;
+            {slideIndices.map(i => {
+                const story = playable[i];
+                const key = storyKey(story);
+                const showImage =
+                    showPhotos && Boolean(story.imageUrl) && !brokenImageKeys.has(key);
+                const isActive = i === index;
+
                 return (
                     <article
-                        key={`${story.title}-${i}`}
-                        className={`display-slide${i === index ? ' active' : ''}`}
-                        aria-hidden={i !== index}
+                        key={key}
+                        className={`display-slide${isActive ? ' active' : ''}`}
+                        aria-hidden={!isActive}
                     >
-                        {renderSlideBg && (
-                            <div
-                                className={[
-                                    'display-bg',
-                                    iosStyle && !showImage && 'display-bg--frost',
-                                    showImage && story.imageBlur && 'display-bg--soft-blur'
-                                ]
-                                    .filter(Boolean)
-                                    .join(' ')}
-                                style={
-                                    showImage
-                                        ? { backgroundImage: `url("${story.imageUrl}")` }
-                                        : iosStyle
-                                          ? undefined
-                                          : {
-                                                backgroundImage:
-                                                    'linear-gradient(135deg, #000 0%, #000 55%, #000 100%)'
-                                            }
-                                }
-                            />
-                        )}
-                        {showImage && (
-                            <img
-                                src={story.imageUrl}
-                                alt=""
-                                hidden
-                                onError={() => setBrokenImages(prev => new Set(prev).add(i))}
-                            />
-                        )}
-                        {showImage && (
-                            <div
-                                className={[
-                                    'display-overlay',
-                                    iosStyle && 'display-overlay--frost'
-                                ]
-                                    .filter(Boolean)
-                                    .join(' ')}
-                            />
-                        )}
-                        <div className="display-content" ref={i === index ? contentRef : undefined}>
+                        <SlideBackground
+                            story={story}
+                            showImage={showImage}
+                            iosStyle={iosStyle}
+                            transparent={transparent}
+                            onImageError={() => markImageBroken(story)}
+                        />
+                        <div className="display-content" ref={isActive ? contentRef : undefined}>
                             {story.link ? (
                                 <a
                                     className="display-article-link"
@@ -267,21 +353,23 @@ export default function DisplayPlayer({
                                 >
                                     <StoryText
                                         story={story}
-                                        descriptionText={i === index ? descriptionText : story.description}
-                                        textStackRef={i === index ? textStackRef : undefined}
-                                        metaRef={i === index ? metaRef : undefined}
-                                        titleRef={i === index ? titleRef : undefined}
-                                        descriptionRef={i === index ? descriptionRef : undefined}
+                                        descriptionText={
+                                            isActive ? descriptionText : story.description
+                                        }
+                                        textStackRef={isActive ? textStackRef : undefined}
+                                        metaRef={isActive ? metaRef : undefined}
+                                        titleRef={isActive ? titleRef : undefined}
+                                        descriptionRef={isActive ? descriptionRef : undefined}
                                     />
                                 </a>
                             ) : (
                                 <StoryText
                                     story={story}
-                                    descriptionText={i === index ? descriptionText : story.description}
-                                    textStackRef={i === index ? textStackRef : undefined}
-                                    metaRef={i === index ? metaRef : undefined}
-                                    titleRef={i === index ? titleRef : undefined}
-                                    descriptionRef={i === index ? descriptionRef : undefined}
+                                    descriptionText={isActive ? descriptionText : story.description}
+                                    textStackRef={isActive ? textStackRef : undefined}
+                                    metaRef={isActive ? metaRef : undefined}
+                                    titleRef={isActive ? titleRef : undefined}
+                                    descriptionRef={isActive ? descriptionRef : undefined}
                                 />
                             )}
                         </div>

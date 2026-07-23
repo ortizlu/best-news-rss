@@ -53,9 +53,17 @@ body.display-transparent {
     filter: saturate(0.65) brightness(0.7);
 }
 
+img.display-bg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border: none;
+    display: block;
+}
+
 .display-bg.display-bg--soft-blur {
-    filter: blur(12px) saturate(0.88) brightness(0.82);
-    transform: scale(1.08);
+    filter: blur(8px) saturate(0.88) brightness(0.82);
+    transform: scale(1.05);
 }
 
 .display-overlay {
@@ -222,6 +230,12 @@ body.display-transparent {
     background: transparent;
 }
 
+/* Photo slides already blur the backdrop — skip page-level backdrop-filter (GPU/memory). */
+.display-page--ios.display-page--has-photos {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
 .display-page--ios .display-slide {
     border-radius: 22px;
     overflow: hidden;
@@ -236,8 +250,8 @@ body.display-transparent {
 }
 
 .display-page--ios .display-bg.display-bg--soft-blur {
-    filter: blur(12px) saturate(0.95) brightness(0.88);
-    transform: scale(1.08);
+    filter: blur(8px) saturate(0.95) brightness(0.88);
+    transform: scale(1.05);
 }
 
 .display-page--ios .display-bg--frost {

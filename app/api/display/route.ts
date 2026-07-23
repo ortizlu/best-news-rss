@@ -7,9 +7,10 @@ export const revalidate = 300;
 export async function GET(request: NextRequest) {
   const max = Number(request.nextUrl.searchParams.get("maxItems"));
   const maxItems = Number.isFinite(max) && max > 0 ? Math.min(max, 50) : 30;
+  const includeImages = request.nextUrl.searchParams.get("includeImages") !== "0";
 
   try {
-    const stories = await getDisplayStories(maxItems);
+    const stories = await getDisplayStories(maxItems, { includeImages });
     return NextResponse.json(
       { stories },
       {
