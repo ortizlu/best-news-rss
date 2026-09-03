@@ -142,7 +142,7 @@ img.display-bg {
 }
 
 .display-description {
-    font-size: clamp(22px, 15cqh, 34px);
+    font-size: clamp(26px, 17cqh, 40px);
     font-weight: 400;
     line-height: 1.18;
     color: rgba(255, 255, 255, 0.95);
@@ -188,7 +188,7 @@ img.display-bg {
     }
 
     .display-description {
-        font-size: clamp(24px, 16cqh, 36px);
+        font-size: clamp(28px, 18cqh, 42px);
         line-height: 1.15;
     }
 }
@@ -203,7 +203,7 @@ img.display-bg {
     }
 
     .display-description {
-        font-size: clamp(18px, 13cqh, 26px);
+        font-size: clamp(21px, 14cqh, 30px);
         line-height: 1.1;
     }
 
@@ -296,6 +296,7 @@ img.display-bg {
 }
 
 .display-page--ios .display-description {
+    font-size: clamp(26px, 17cqh, 40px);
     color: rgba(255, 255, 255, 0.92);
     text-shadow:
         0 1px 2px rgba(0, 0, 0, 0.8),
