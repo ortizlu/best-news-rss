@@ -1,3 +1,4 @@
+import { isNewsBreakItemInRegion } from './region';
 import type { CleanOptions } from '../types';
 import type { CleanedFeed, CleanedItem } from '../rss/fetch';
 import { formatPubDate } from '../rss/dates';
@@ -78,6 +79,7 @@ export async function fetchAndCleanNewsBreakFeed(
 
     const items: CleanedItem[] = page.feed
         .filter(item => item.title && item.docid)
+        .filter(item => isNewsBreakItemInRegion(slug, item.city_name))
         .map(item => {
             const description = extractLeadText(item.summary, options);
             const publisher = item.source?.trim();

@@ -38,11 +38,6 @@
             "url": "https://www.newsbreak.com/groveton-va"
         },
         {
-            "id": "newsbreak-arlington",
-            "name": "NewsBreak · Arlington",
-            "url": "https://www.newsbreak.com/arlington-va"
-        },
-        {
             "id": "fox-world",
             "name": "Fox News World",
             "url": "https://moxie.foxnews.com/google-publisher/world.xml"
