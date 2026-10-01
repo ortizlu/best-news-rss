@@ -66,12 +66,6 @@ img.display-bg {
     transform: scale(1.05);
 }
 
-/* Stronger blur for illustrated book covers (catechism) so title art doesn't compete with Q&A. */
-.display-bg.display-bg--soft-blur[src*="1689-confession-modern-eng"] {
-    filter: blur(18px) saturate(0.9) brightness(0.55);
-    transform: scale(1.08);
-}
-
 .display-overlay {
     position: absolute;
     inset: 0;
@@ -258,11 +252,6 @@ img.display-bg {
 .display-page--ios .display-bg.display-bg--soft-blur {
     filter: blur(8px) saturate(0.95) brightness(0.88);
     transform: scale(1.05);
-}
-
-.display-page--ios .display-bg.display-bg--soft-blur[src*="1689-confession-modern-eng"] {
-    filter: blur(18px) saturate(0.95) brightness(0.58);
-    transform: scale(1.08);
 }
 
 .display-page--ios .display-bg--frost {

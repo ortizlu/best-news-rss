@@ -4,6 +4,7 @@ import {
   interleaveCatechism,
   interleaveEvenly,
   pickCatechismItems,
+  stripScriptureReferences,
   type CatechismItem,
 } from "./catechism";
 import type { DisplayStory } from "./items";
@@ -68,14 +69,45 @@ describe("pickCatechismItems", () => {
   });
 });
 
+describe("stripScriptureReferences", () => {
+  it("removes verse parentheses and cleans punctuation", () => {
+    expect(
+      stripScriptureReferences(
+        "God is the first and chiefest being. (Isa. 44:6; 48:12)",
+      ),
+    ).toBe("God is the first and chiefest being.");
+    expect(
+      stripScriptureReferences(
+        "Everyone ought to believe there is a God; (Heb. 11:6) and it is their great sin and folly who do not. (Psa. 14:1)",
+      ),
+    ).toBe(
+      "Everyone ought to believe there is a God, and it is their great sin and folly who do not.",
+    );
+  });
+
+  it("keeps non-verse parentheticals", () => {
+    expect(
+      stripScriptureReferences(
+        "a promise of long life and prosperity (as far as it shall serve for God’s glory, and their own good) to all such as keep this commandment. (Deut. 5:16; Eph. 6:2–3)",
+      ),
+    ).toBe(
+      "a promise of long life and prosperity (as far as it shall serve for God’s glory, and their own good) to all such as keep this commandment.",
+    );
+  });
+});
+
 describe("catechismToStory", () => {
-  it("maps question/answer and labels the source", () => {
-    const story = catechismToStory(sample[0]!);
-    expect(story.title).toBe("Q1?");
-    expect(story.description).toBe("A1");
-    expect(story.source).toBe("Baptist Catechism · Q. 1");
+  it("maps question/answer and strips scripture by default", () => {
+    const story = catechismToStory({
+      number: 1,
+      question: "Who is the first and chiefest being?",
+      answer: "God is the first and chiefest being. (Isa. 44:6; 48:12)",
+    });
+    expect(story.title).toBe("Who is the first and chiefest being?");
+    expect(story.description).toBe("God is the first and chiefest being.");
+    expect(story.source).toBe("Baptist Catechism · Question 1");
     expect(story.pubDate).toBeUndefined();
-    expect(story.imageUrl).toContain("1689-confession-modern-eng");
-    expect(story.imageBlur).toBe(true);
+    expect(story.imageUrl).toBe("/catechism-wallpaper.jpeg");
+    expect(story.imageBlur).toBeUndefined();
   });
 });

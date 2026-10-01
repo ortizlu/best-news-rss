@@ -18,9 +18,8 @@ const CATECHISM_PATH = path.join(process.cwd(), "data", "baptist-catechism.json"
 
 const SOURCE_LABEL = "Baptist Catechism";
 
-/** Founders 1689 Confession cover — soft-blurred behind catechism slides. */
-export const CATECHISM_BACKGROUND_URL =
-  "https://founders.org/wp-content/uploads/2023/01/1689-confession-modern-eng.jpg";
+/** Local 1689 wallpaper served from /public (sharp, unblurred). */
+export const CATECHISM_BACKGROUND_URL = "/catechism-wallpaper.jpeg";
 
 /** Default Q&As added on top of the full news pool when catechism=true. */
 export const DEFAULT_CATECHISM_COUNT = 30;
@@ -72,11 +71,27 @@ export function pickCatechismItems(
 export function catechismToStory(item: CatechismItem): DisplayStory {
   return {
     title: item.question,
-    description: item.answer,
-    source: `${SOURCE_LABEL} · Q. ${item.number}`,
+    description: stripScriptureReferences(item.answer),
+    source: `${SOURCE_LABEL} · Question ${item.number}`,
     imageUrl: CATECHISM_BACKGROUND_URL,
-    imageBlur: true,
   };
+}
+
+/**
+ * Drop parenthetical scripture proofs for display. Keeps non-verse asides
+ * (e.g. Q. 71’s “as far as it shall serve…”). Full text stays in the JSON.
+ */
+export function stripScriptureReferences(text: string): string {
+  let out = text.replace(/\s*\([^)]*\d[^)]*\)/g, "");
+  out = out.replace(/\s{2,}/g, " ");
+  out = out.replace(/\s+([,.;:!?])/g, "$1");
+  // Space after punctuation, but not before closing quotes.
+  out = out.replace(/([,;:])(?=[^\s”"'])/g, "$1 ");
+  out = out.replace(/;\s+(and|but|or)\b/gi, ", $1");
+  out = out.replace(/,\s*,+/g, ",");
+  out = out.replace(/\.\s*\./g, ".");
+  out = out.replace(/,\s+([”"'])/g, ",$1");
+  return out.trim();
 }
 
 /**
