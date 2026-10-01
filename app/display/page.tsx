@@ -18,6 +18,8 @@ type PageProps = {
     transparent?: string;
     ios?: string;
     align?: string;
+    catechism?: string;
+    catechismEvery?: string;
   }>;
 };
 
@@ -33,6 +35,12 @@ function textAlign(value: string | undefined): "left" | "right" {
   return value === "right" ? "right" : "left";
 }
 
+function catechismEvery(value: string | undefined): number {
+  const n = Number(value);
+  if (!Number.isFinite(n) || n < 1) return 4;
+  return Math.min(20, Math.floor(n));
+}
+
 export default async function DisplayPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const parsed = Number(params.seconds);
@@ -43,8 +51,14 @@ export default async function DisplayPage({ searchParams }: PageProps) {
   const transparent = flag(params.transparent);
   const iosStyle = flag(params.ios);
   const align = textAlign(params.align);
+  const includeCatechism = flag(params.catechism);
+  const every = catechismEvery(params.catechismEvery);
 
-  const stories = await getDisplayStories(30, { includeImages: showPhotos });
+  const stories = await getDisplayStories(30, {
+    includeImages: showPhotos,
+    includeCatechism,
+    catechismEvery: every,
+  });
 
   return (
     <DisplayPlayer
@@ -55,6 +69,8 @@ export default async function DisplayPage({ searchParams }: PageProps) {
       transparent={transparent}
       iosStyle={iosStyle}
       textAlign={align}
+      includeCatechism={includeCatechism}
+      catechismEvery={every}
     />
   );
 }

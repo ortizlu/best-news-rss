@@ -49,6 +49,25 @@ For full-bleed background images with readable text overlay, use a **Website/iFr
 
 Stories rotate every 14 seconds (change with `?seconds=5` through `120`). The page reloads every 5 minutes to pick up fresh headlines. The blue progress strip is off by default; add `&progress=true` to enable it.
 
+**Display query flags**
+
+| Param | Default | Effect |
+|-------|---------|--------|
+| `seconds` | `14` | Seconds per slide (`5`–`120`) |
+| `photos` | on | Set `false` to skip background images |
+| `progress` | off | Show the progress strip |
+| `ios` | off | iOS-style frosted overlay |
+| `transparent` | off | Transparent page background |
+| `align` | `left` | `right` for right-aligned text |
+| `catechism` | off | Interleave Baptist Catechism Q&As with news |
+| `catechismEvery` | `4` | Insert one Q&A after this many news stories |
+
+Example with catechism:
+
+`/display?seconds=60&photos=true&progress=false&ios=true&catechism=true`
+
+When `catechism=true`, questions from [The Baptist Catechism](https://founders.org/library/the-baptist-catechism/) appear as slides (title = question, body = answer), mixed into the news rotation. The set rotates hourly across the 114 Q&As.
+
 **Why does text still look cropped?** Content is limited in three places:
 
 1. **Extraction** (`lib/display/items.ts`) — `maxParagraphs` (default `8` for display) and `maxDescriptionLength` (`1000`). RSS feeds often only ship one short summary paragraph.
