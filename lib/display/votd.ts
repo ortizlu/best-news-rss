@@ -3,7 +3,7 @@ import type { DisplayStory } from "./items";
 const VOTD_URL =
   "https://www.biblegateway.com/votd/get/?format=json&version=ESV";
 
-export const DEFAULT_VOTD_COPIES = 3;
+export const DEFAULT_VOTD_COPIES = 6;
 
 /** Local sword wallpaper served from /public. */
 export const VOTD_BACKGROUND_URL = "/verse-of-day.jpeg";

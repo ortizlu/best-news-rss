@@ -167,9 +167,9 @@ export default function DisplayPlayer({
     textAlign,
     includeCatechism = false,
     catechismEvery = 4,
-    catechismCount = 19,
+    catechismCount = 10,
     includeVotd = false,
-    votdCount = 3
+    votdCount = 6
 }: Props) {
     const [playable, setPlayable] = useState(initialStories);
     const [index, setIndex] = useState(0);

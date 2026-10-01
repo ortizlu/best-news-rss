@@ -22,7 +22,7 @@ const SOURCE_LABEL = "Baptist Catechism";
 export const CATECHISM_BACKGROUND_URL = "/catechism-wallpaper.jpeg";
 
 /** Default Q&As added on top of the full news pool when catechism=true. */
-export const DEFAULT_CATECHISM_COUNT = 19;
+export const DEFAULT_CATECHISM_COUNT = 10;
 
 let cached: CatechismItem[] | null = null;
 
