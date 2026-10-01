@@ -1,4 +1,5 @@
 const WTOP_LOGO_PATH = 'wtop_logo_512x512';
+const CATECHISM_BG_PATH = '1689-confession-modern-eng';
 
 /** Sized for Dakboard widgets — full-res OG URLs are unnecessary. */
 export const DISPLAY_IMAGE_WIDTH = 800;
@@ -34,6 +35,14 @@ function isWtopLogo(url: string): boolean {
     }
 }
 
+function isCatechismBackground(url: string): boolean {
+    try {
+        return new URL(url).pathname.includes(CATECHISM_BG_PATH);
+    } catch {
+        return url.includes(CATECHISM_BG_PATH);
+    }
+}
+
 export function resolveDisplayImageUrl(imageUrl?: string): {
     url?: string;
     blur?: boolean;
@@ -42,16 +51,19 @@ export function resolveDisplayImageUrl(imageUrl?: string): {
     if (isWtopLogo(imageUrl)) {
         return { url: WTOP_LOGO_REPLACEMENT, blur: true };
     }
+    if (isCatechismBackground(imageUrl)) {
+        return { url: imageUrl, blur: true };
+    }
     return { url: resizeDisplayImageUrl(imageUrl) };
 }
 
-export function applyDisplayImageOverrides<T extends { imageUrl?: string }>(
-    story: T,
-): T & { imageUrl?: string; imageBlur?: boolean } {
+export function applyDisplayImageOverrides<
+    T extends { imageUrl?: string; imageBlur?: boolean },
+>(story: T): T & { imageUrl?: string; imageBlur?: boolean } {
     const resolved = resolveDisplayImageUrl(story.imageUrl);
     return {
         ...story,
         imageUrl: resolved.url,
-        imageBlur: resolved.blur
+        imageBlur: resolved.blur ?? story.imageBlur
     };
 }

@@ -18,6 +18,10 @@ const CATECHISM_PATH = path.join(process.cwd(), "data", "baptist-catechism.json"
 
 const SOURCE_LABEL = "Baptist Catechism";
 
+/** Founders 1689 Confession cover — soft-blurred behind catechism slides. */
+export const CATECHISM_BACKGROUND_URL =
+  "https://founders.org/wp-content/uploads/2023/01/1689-confession-modern-eng.jpg";
+
 let cached: CatechismItem[] | null = null;
 
 export async function loadCatechismItems(): Promise<CatechismItem[]> {
@@ -54,7 +58,8 @@ export function catechismToStory(item: CatechismItem): DisplayStory {
     title: item.question,
     description: item.answer,
     source: `${SOURCE_LABEL} · Q. ${item.number}`,
-    // No link — avoids scraping Founders for og:image on every Q&A slide.
+    imageUrl: CATECHISM_BACKGROUND_URL,
+    imageBlur: true,
   };
 }
 

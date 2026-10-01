@@ -67,5 +67,7 @@ describe("catechismToStory", () => {
     expect(story.description).toBe("A1");
     expect(story.source).toBe("Baptist Catechism · Q. 1");
     expect(story.pubDate).toBeUndefined();
+    expect(story.imageUrl).toContain("1689-confession-modern-eng");
+    expect(story.imageBlur).toBe(true);
   });
 });
