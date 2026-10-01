@@ -26,7 +26,7 @@ export type GetDisplayStoriesOptions = {
   includeCatechism?: boolean;
   /** Insert cadence hint (default 4). Large catechism pools fall back to even mix. */
   catechismEvery?: number;
-  /** How many random Q&As to add on top of news (default 30). */
+  /** How many random Q&As to add on top of news (default 19). */
   catechismCount?: number;
 };
 

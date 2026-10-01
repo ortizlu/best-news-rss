@@ -60,14 +60,14 @@ Stories rotate every 14 seconds (change with `?seconds=5` through `120`). The pa
 | `transparent` | off | Transparent page background |
 | `align` | `left` | `right` for right-aligned text |
 | `catechism` | off | Interleave Baptist Catechism Q&As with news |
-| `catechismCount` | `30` | Random Q&As **added on top of** the full news pool |
+| `catechismCount` | `19` | Random Q&As **added on top of** the full news pool |
 | `catechismEvery` | `4` | Preferred spacing (falls back to even mix for large counts) |
 
 Example with catechism:
 
 `/display?seconds=60&photos=true&progress=false&ios=true&catechism=true`
 
-When `catechism=true`, ~30 news stories stay in the rotation and ~30 random Q&As from [The Baptist Catechism](https://founders.org/library/the-baptist-catechism/) are mixed in (~60 slides total). Only the active slide (plus neighbors) is mounted in the DOM; the rest are in the in-memory pool. The random set reshuffles hourly.
+When `catechism=true`, ~30 news stories stay in the rotation and ~19 random Q&As from [The Baptist Catechism](https://founders.org/library/the-baptist-catechism/) are mixed in (~49 slides total). Only the active slide (plus neighbors) is mounted in the DOM; the rest are in the in-memory pool. The random set reshuffles hourly.
 
 **Why does text still look cropped?** Content is limited in three places:
 
