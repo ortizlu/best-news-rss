@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { DEFAULT_CATECHISM_COUNT } from "@/lib/display/catechism";
 import { getDisplayStories } from "@/lib/display/items";
 
 export const runtime = "nodejs";
@@ -18,12 +19,18 @@ export async function GET(request: NextRequest) {
     Number.isFinite(everyRaw) && everyRaw >= 1
       ? Math.min(20, Math.floor(everyRaw))
       : 4;
+  const countRaw = Number(request.nextUrl.searchParams.get("catechismCount"));
+  const catechismCount =
+    Number.isFinite(countRaw) && countRaw >= 1
+      ? Math.min(114, Math.floor(countRaw))
+      : DEFAULT_CATECHISM_COUNT;
 
   try {
     const stories = await getDisplayStories(maxItems, {
       includeImages,
       includeCatechism,
       catechismEvery,
+      catechismCount,
     });
     return NextResponse.json(
       { stories },

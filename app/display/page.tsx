@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { DEFAULT_CATECHISM_COUNT } from "@/lib/display/catechism";
 import { getDisplayStories } from "@/lib/display/items";
 import DisplayPlayer from "./DisplayPlayer";
 
@@ -20,6 +21,7 @@ type PageProps = {
     align?: string;
     catechism?: string;
     catechismEvery?: string;
+    catechismCount?: string;
   }>;
 };
 
@@ -41,6 +43,12 @@ function catechismEvery(value: string | undefined): number {
   return Math.min(20, Math.floor(n));
 }
 
+function parseCatechismCount(value: string | undefined): number {
+  const n = Number(value);
+  if (!Number.isFinite(n) || n < 1) return DEFAULT_CATECHISM_COUNT;
+  return Math.min(114, Math.floor(n));
+}
+
 export default async function DisplayPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const parsed = Number(params.seconds);
@@ -53,11 +61,13 @@ export default async function DisplayPage({ searchParams }: PageProps) {
   const align = textAlign(params.align);
   const includeCatechism = flag(params.catechism);
   const every = catechismEvery(params.catechismEvery);
+  const count = parseCatechismCount(params.catechismCount);
 
   const stories = await getDisplayStories(30, {
     includeImages: showPhotos,
     includeCatechism,
     catechismEvery: every,
+    catechismCount: count,
   });
 
   return (
@@ -71,6 +81,7 @@ export default async function DisplayPage({ searchParams }: PageProps) {
       textAlign={align}
       includeCatechism={includeCatechism}
       catechismEvery={every}
+      catechismCount={count}
     />
   );
 }

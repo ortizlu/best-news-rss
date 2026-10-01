@@ -51,6 +51,7 @@ type Props = {
     textAlign: 'left' | 'right';
     includeCatechism?: boolean;
     catechismEvery?: number;
+    catechismCount?: number;
 };
 
 type StoryTextProps = {
@@ -163,7 +164,8 @@ export default function DisplayPlayer({
     iosStyle,
     textAlign,
     includeCatechism = false,
-    catechismEvery = 4
+    catechismEvery = 4,
+    catechismCount = 30
 }: Props) {
     const [playable, setPlayable] = useState(initialStories);
     const [index, setIndex] = useState(0);
@@ -267,6 +269,7 @@ export default function DisplayPlayer({
                 if (includeCatechism) {
                     params.set('catechism', '1');
                     params.set('catechismEvery', String(catechismEvery));
+                    params.set('catechismCount', String(catechismCount));
                 }
                 const res = await fetch(`/api/display?${params.toString()}`, {
                     cache: 'no-store'
@@ -283,7 +286,7 @@ export default function DisplayPlayer({
 
         const id = window.setInterval(refreshStories, STORY_REFRESH_MS);
         return () => clearInterval(id);
-    }, [showPhotos, includeCatechism, catechismEvery]);
+    }, [showPhotos, includeCatechism, catechismEvery, catechismCount]);
 
     useEffect(() => {
         if (!transparent) return;

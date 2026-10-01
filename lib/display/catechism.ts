@@ -22,6 +22,9 @@ const SOURCE_LABEL = "Baptist Catechism";
 export const CATECHISM_BACKGROUND_URL =
   "https://founders.org/wp-content/uploads/2023/01/1689-confession-modern-eng.jpg";
 
+/** Default Q&As added on top of the full news pool when catechism=true. */
+export const DEFAULT_CATECHISM_COUNT = 30;
+
 let cached: CatechismItem[] | null = null;
 
 export async function loadCatechismItems(): Promise<CatechismItem[]> {
@@ -32,25 +35,38 @@ export async function loadCatechismItems(): Promise<CatechismItem[]> {
   return cached;
 }
 
-/** Hourly rotation so soft refreshes advance through the catechism. */
-export function catechismStartIndex(total: number, now = Date.now()): number {
-  if (total <= 0) return 0;
-  const hourBucket = Math.floor(now / (60 * 60 * 1000));
-  return ((hourBucket % total) + total) % total;
+/** Deterministic PRNG — stable within an hour so soft refresh doesn't reshuffle mid-rotation. */
+function mulberry32(seed: number): () => number {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
 }
 
+function hourSeed(now: number): number {
+  return Math.floor(now / (60 * 60 * 1000));
+}
+
+/** Fisher–Yates shuffle with hourly-seeded RNG, then take `count`. */
 export function pickCatechismItems(
   items: CatechismItem[],
   count: number,
   now = Date.now(),
 ): CatechismItem[] {
   if (items.length === 0 || count <= 0) return [];
-  const start = catechismStartIndex(items.length, now);
-  const picked: CatechismItem[] = [];
-  for (let i = 0; i < Math.min(count, items.length); i++) {
-    picked.push(items[(start + i) % items.length]!);
+  const rng = mulberry32(hourSeed(now) ^ 0xca7e01);
+  const shuffled = items.slice();
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    const tmp = shuffled[i]!;
+    shuffled[i] = shuffled[j]!;
+    shuffled[j] = tmp;
   }
-  return picked;
+  return shuffled.slice(0, Math.min(count, shuffled.length));
 }
 
 export function catechismToStory(item: CatechismItem): DisplayStory {
@@ -64,8 +80,42 @@ export function catechismToStory(item: CatechismItem): DisplayStory {
 }
 
 /**
- * Keep ~maxItems total: after every `every` news stories, insert one catechism.
- * Example every=4 → N N N N C N N N N C …
+ * Fair merge so all of `secondary` is spread through `primary`
+ * (equal lengths ≈ alternate; more news stays news-heavy).
+ */
+export function interleaveEvenly(
+  primary: DisplayStory[],
+  secondary: DisplayStory[],
+): DisplayStory[] {
+  if (secondary.length === 0) return primary;
+  if (primary.length === 0) return secondary;
+
+  const out: DisplayStory[] = [];
+  let i = 0;
+  let j = 0;
+  while (i < primary.length && j < secondary.length) {
+    if (i * secondary.length <= j * primary.length) {
+      out.push(primary[i]!);
+      i += 1;
+    } else {
+      out.push(secondary[j]!);
+      j += 1;
+    }
+  }
+  while (i < primary.length) {
+    out.push(primary[i]!);
+    i += 1;
+  }
+  while (j < secondary.length) {
+    out.push(secondary[j]!);
+    j += 1;
+  }
+  return out;
+}
+
+/**
+ * After every `every` news stories, insert one catechism; leftover catechism
+ * are spread through the remainder via even merge (so a large pool is fully used).
  */
 export function interleaveCatechism(
   news: DisplayStory[],
@@ -74,6 +124,13 @@ export function interleaveCatechism(
 ): DisplayStory[] {
   const gap = Math.max(1, Math.floor(every));
   if (catechism.length === 0) return news;
+  if (news.length === 0) return catechism;
+
+  // Prefer the every-N cadence when it can place most/all items; otherwise even merge.
+  const slotsFromCadence = Math.floor(news.length / gap);
+  if (catechism.length > slotsFromCadence * 1.25) {
+    return interleaveEvenly(news, catechism);
+  }
 
   const out: DisplayStory[] = [];
   let cIdx = 0;
@@ -89,17 +146,8 @@ export function interleaveCatechism(
     }
   }
 
+  if (cIdx < catechism.length) {
+    return interleaveEvenly(out, catechism.slice(cIdx));
+  }
   return out;
-}
-
-/** How many news vs catechism slots fit in maxItems at the given cadence. */
-export function splitDisplayBudget(
-  maxItems: number,
-  every: number,
-): { newsCount: number; catechismCount: number } {
-  const gap = Math.max(1, Math.floor(every));
-  const period = gap + 1;
-  const catechismCount = Math.floor(maxItems / period);
-  const newsCount = Math.max(0, maxItems - catechismCount);
-  return { newsCount, catechismCount };
 }

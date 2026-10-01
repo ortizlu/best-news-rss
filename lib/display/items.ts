@@ -4,11 +4,11 @@ import { DEFAULT_CLEAN_OPTIONS } from "../rss/clean";
 import { enrichStoriesWithOgImages } from "../rss/og-image";
 import { fetchAndMergeFeeds } from "../rss/merge";
 import {
+  DEFAULT_CATECHISM_COUNT,
   catechismToStory,
   interleaveCatechism,
   loadCatechismItems,
   pickCatechismItems,
-  splitDisplayBudget,
 } from "./catechism";
 
 export type DisplayStory = {
@@ -24,8 +24,10 @@ export type DisplayStory = {
 export type GetDisplayStoriesOptions = {
   includeImages?: boolean;
   includeCatechism?: boolean;
-  /** Insert one catechism Q&A after this many news stories (default 4). */
+  /** Insert cadence hint (default 4). Large catechism pools fall back to even mix. */
   catechismEvery?: number;
+  /** How many random Q&As to add on top of news (default 30). */
+  catechismCount?: number;
 };
 
 function pubDateMs(pubDate?: string): number {
@@ -40,17 +42,19 @@ export async function getDisplayStories(
     includeImages = true,
     includeCatechism = false,
     catechismEvery = 4,
+    catechismCount = DEFAULT_CATECHISM_COUNT,
   }: GetDisplayStoriesOptions = {},
 ): Promise<DisplayStory[]> {
   const every = Math.max(1, Math.min(20, Math.floor(catechismEvery) || 4));
-  const { newsCount, catechismCount } = includeCatechism
-    ? splitDisplayBudget(maxItems, every)
-    : { newsCount: maxItems, catechismCount: 0 };
+  const qCount = Math.max(
+    0,
+    Math.min(114, Math.floor(catechismCount) || DEFAULT_CATECHISM_COUNT),
+  );
 
   const feeds = await loadFeeds();
   let news: DisplayStory[] = [];
 
-  if (feeds.length > 0 && newsCount > 0) {
+  if (feeds.length > 0 && maxItems > 0) {
     const options = {
       ...DEFAULT_CLEAN_OPTIONS,
       includeItemLinks: true,
@@ -62,14 +66,14 @@ export async function getDisplayStories(
     };
 
     // Over-fetch so filtering out body-less items still fills the rotation.
-    const fetchLimit = Math.min(newsCount * 4, 120);
+    const fetchLimit = Math.min(maxItems * 4, 120);
     const merged = await fetchAndMergeFeeds(feeds, options, fetchLimit);
 
     const sorted = [...merged.items].sort(
       (a, b) => pubDateMs(b.pubDate) - pubDateMs(a.pubDate),
     );
 
-    news = sorted.slice(0, newsCount).map((item) => ({
+    news = sorted.slice(0, maxItems).map((item) => ({
       title: item.title,
       description: item.description,
       source: item.source,
@@ -81,16 +85,15 @@ export async function getDisplayStories(
 
   let stories = news;
 
-  if (includeCatechism && catechismCount > 0) {
+  if (includeCatechism && qCount > 0) {
     const items = await loadCatechismItems();
-    const picked = pickCatechismItems(items, catechismCount).map(catechismToStory);
+    const picked = pickCatechismItems(items, qCount).map(catechismToStory);
     stories = interleaveCatechism(news, picked, every);
   }
 
   if (!includeImages) return stories;
 
   // No RSS image → use the article page's og:image (hero photo).
-  // Catechism items have no image; enrichment skips empty links gracefully.
   const enriched = await enrichStoriesWithOgImages(stories);
   return enriched.map(applyDisplayImageOverrides);
 }

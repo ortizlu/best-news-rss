@@ -1,10 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
-  catechismStartIndex,
   catechismToStory,
   interleaveCatechism,
+  interleaveEvenly,
   pickCatechismItems,
-  splitDisplayBudget,
   type CatechismItem,
 } from "./catechism";
 import type { DisplayStory } from "./items";
@@ -20,20 +19,11 @@ function news(n: number): DisplayStory[] {
   return Array.from({ length: n }, (_, i) => ({ title: `News ${i + 1}` }));
 }
 
-describe("splitDisplayBudget", () => {
-  it("reserves catechism slots inside maxItems", () => {
-    expect(splitDisplayBudget(30, 4)).toEqual({
-      newsCount: 24,
-      catechismCount: 6,
-    });
-  });
-});
-
 describe("interleaveCatechism", () => {
-  it("inserts one catechism after every N news items", () => {
+  it("inserts one catechism after every N news items when the pool is small", () => {
     const result = interleaveCatechism(
       news(8),
-      sample.map(catechismToStory),
+      sample.slice(0, 2).map(catechismToStory),
       4,
     );
     expect(result.map((s) => s.title)).toEqual([
@@ -49,14 +39,32 @@ describe("interleaveCatechism", () => {
       "Q2?",
     ]);
   });
+
+  it("uses even merge when many catechism items are added on top of news", () => {
+    const cats = sample.map(catechismToStory);
+    const result = interleaveCatechism(news(4), cats, 4);
+    expect(result).toHaveLength(8);
+    expect(result.filter((s) => s.title.startsWith("News"))).toHaveLength(4);
+    expect(result.filter((s) => s.title.startsWith("Q"))).toHaveLength(4);
+  });
+});
+
+describe("interleaveEvenly", () => {
+  it("alternates equal-length pools", () => {
+    const result = interleaveEvenly(news(2), [
+      { title: "C1" },
+      { title: "C2" },
+    ]);
+    expect(result.map((s) => s.title)).toEqual(["News 1", "C1", "News 2", "C2"]);
+  });
 });
 
 describe("pickCatechismItems", () => {
-  it("rotates from an hourly start index", () => {
-    const start = catechismStartIndex(sample.length, 0);
-    expect(start).toBe(0);
-    const picked = pickCatechismItems(sample, 3, 0);
-    expect(picked.map((i) => i.number)).toEqual([1, 2, 3]);
+  it("returns a stable hourly sample of the requested size", () => {
+    const a = pickCatechismItems(sample, 3, 0);
+    const b = pickCatechismItems(sample, 3, 0);
+    expect(a.map((i) => i.number)).toEqual(b.map((i) => i.number));
+    expect(a).toHaveLength(3);
   });
 });
 
