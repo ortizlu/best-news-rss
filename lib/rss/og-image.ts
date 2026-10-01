@@ -72,7 +72,8 @@ export async function enrichStoriesWithOgImages<
   const needsOg = out.filter((s) => !s.imageUrl && s.link);
 
   await runPool(needsOg, concurrency, async (story) => {
-    const og = await fetchOgImage(story.link!);
+    if (!story.link?.startsWith("http")) return;
+    const og = await fetchOgImage(story.link);
     if (og) story.imageUrl = og;
   });
 

@@ -7,9 +7,15 @@ import {
   DEFAULT_CATECHISM_COUNT,
   catechismToStory,
   interleaveCatechism,
+  interleaveEvenly,
   loadCatechismItems,
   pickCatechismItems,
 } from "./catechism";
+import {
+  DEFAULT_VOTD_COPIES,
+  fetchVerseOfTheDay,
+  replicateStory,
+} from "./votd";
 
 export type DisplayStory = {
   title: string;
@@ -28,6 +34,9 @@ export type GetDisplayStoriesOptions = {
   catechismEvery?: number;
   /** How many random Q&As to add on top of news (default 19). */
   catechismCount?: number;
+  includeVotd?: boolean;
+  /** How many copies of today's verse to mix in (default 3). */
+  votdCount?: number;
 };
 
 function pubDateMs(pubDate?: string): number {
@@ -43,12 +52,18 @@ export async function getDisplayStories(
     includeCatechism = false,
     catechismEvery = 4,
     catechismCount = DEFAULT_CATECHISM_COUNT,
+    includeVotd = false,
+    votdCount = DEFAULT_VOTD_COPIES,
   }: GetDisplayStoriesOptions = {},
 ): Promise<DisplayStory[]> {
   const every = Math.max(1, Math.min(20, Math.floor(catechismEvery) || 4));
   const qCount = Math.max(
     0,
     Math.min(114, Math.floor(catechismCount) || DEFAULT_CATECHISM_COUNT),
+  );
+  const vCount = Math.max(
+    0,
+    Math.min(10, Math.floor(votdCount) || DEFAULT_VOTD_COPIES),
   );
 
   const feeds = await loadFeeds();
@@ -89,6 +104,13 @@ export async function getDisplayStories(
     const items = await loadCatechismItems();
     const picked = pickCatechismItems(items, qCount).map(catechismToStory);
     stories = interleaveCatechism(news, picked, every);
+  }
+
+  if (includeVotd && vCount > 0) {
+    const verse = await fetchVerseOfTheDay();
+    if (verse) {
+      stories = interleaveEvenly(stories, replicateStory(verse, vCount));
+    }
   }
 
   if (!includeImages) return stories;

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { DEFAULT_CATECHISM_COUNT } from "@/lib/display/catechism";
 import { getDisplayStories } from "@/lib/display/items";
+import { DEFAULT_VOTD_COPIES } from "@/lib/display/votd";
 import DisplayPlayer from "./DisplayPlayer";
 
 export const metadata: Metadata = {
@@ -22,6 +23,8 @@ type PageProps = {
     catechism?: string;
     catechismEvery?: string;
     catechismCount?: string;
+    votd?: string;
+    votdCount?: string;
   }>;
 };
 
@@ -49,6 +52,12 @@ function parseCatechismCount(value: string | undefined): number {
   return Math.min(114, Math.floor(n));
 }
 
+function parseVotdCount(value: string | undefined): number {
+  const n = Number(value);
+  if (!Number.isFinite(n) || n < 1) return DEFAULT_VOTD_COPIES;
+  return Math.min(10, Math.floor(n));
+}
+
 export default async function DisplayPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const parsed = Number(params.seconds);
@@ -62,12 +71,16 @@ export default async function DisplayPage({ searchParams }: PageProps) {
   const includeCatechism = flag(params.catechism);
   const every = catechismEvery(params.catechismEvery);
   const count = parseCatechismCount(params.catechismCount);
+  const includeVotd = flag(params.votd);
+  const votdCopies = parseVotdCount(params.votdCount);
 
   const stories = await getDisplayStories(30, {
     includeImages: showPhotos,
     includeCatechism,
     catechismEvery: every,
     catechismCount: count,
+    includeVotd,
+    votdCount: votdCopies,
   });
 
   return (
@@ -82,6 +95,8 @@ export default async function DisplayPage({ searchParams }: PageProps) {
       includeCatechism={includeCatechism}
       catechismEvery={every}
       catechismCount={count}
+      includeVotd={includeVotd}
+      votdCount={votdCopies}
     />
   );
 }
