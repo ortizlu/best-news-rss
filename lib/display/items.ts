@@ -35,7 +35,7 @@ export type GetDisplayStoriesOptions = {
   /** How many random Q&As to add on top of news (default 10). */
   catechismCount?: number;
   includeVotd?: boolean;
-  /** How many copies of today's verse to mix in (default 6). */
+  /** How many copies of today's verse to mix in (default 10). */
   votdCount?: number;
 };
 

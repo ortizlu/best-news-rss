@@ -3,7 +3,7 @@ import type { DisplayStory } from "./items";
 const VOTD_URL =
   "https://www.biblegateway.com/votd/get/?format=json&version=ESV";
 
-export const DEFAULT_VOTD_COPIES = 6;
+export const DEFAULT_VOTD_COPIES = 10;
 
 /** Local sword wallpaper served from /public. */
 export const VOTD_BACKGROUND_URL = "/verse-of-day.jpeg";
@@ -81,7 +81,25 @@ export function replicateStory(
   }));
 }
 
-export async function fetchVerseOfTheDay(): Promise<DisplayStory | null> {
+type DayCache = {
+  dayKey: string;
+  story: DisplayStory | null;
+  pending?: Promise<DisplayStory | null>;
+};
+
+let dayCache: DayCache | null = null;
+
+/** YYYY-MM-DD in America/New_York — matches typical “verse of the day” rollover. */
+export function votdDayKey(now = new Date()): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/New_York",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(now);
+}
+
+async function fetchVerseOfTheDayUncached(): Promise<DisplayStory | null> {
   try {
     const res = await fetch(VOTD_URL, {
       headers: {
@@ -89,7 +107,8 @@ export async function fetchVerseOfTheDay(): Promise<DisplayStory | null> {
         "User-Agent": "best-news-rss/1.0 (display votd)",
       },
       signal: AbortSignal.timeout(8000),
-      next: { revalidate: 3600 },
+      // Next data cache — keeps CDN/server fetches warm across instances.
+      next: { revalidate: 86400 },
     });
     if (!res.ok) return null;
     const data = (await res.json()) as VotdPayload;
@@ -97,4 +116,23 @@ export async function fetchVerseOfTheDay(): Promise<DisplayStory | null> {
   } catch {
     return null;
   }
+}
+
+/**
+ * One Bible Gateway hit per calendar day per server instance.
+ * Soft refreshes (/api/display every 5m) reuse the in-memory result.
+ */
+export async function fetchVerseOfTheDay(): Promise<DisplayStory | null> {
+  const dayKey = votdDayKey();
+  if (dayCache?.dayKey === dayKey) {
+    if (dayCache.story) return dayCache.story;
+    if (dayCache.pending) return dayCache.pending;
+  }
+
+  const pending = fetchVerseOfTheDayUncached().then((story) => {
+    dayCache = { dayKey, story };
+    return story;
+  });
+  dayCache = { dayKey, story: null, pending };
+  return pending;
 }

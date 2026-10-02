@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   decodeHtmlEntities,
   replicateStory,
+  votdDayKey,
   votdToStory,
 } from "./votd";
 
@@ -47,5 +48,13 @@ describe("replicateStory", () => {
       "votd://copy-2",
       "votd://copy-3",
     ]);
+  });
+});
+
+describe("votdDayKey", () => {
+  it("returns a YYYY-MM-DD string", () => {
+    expect(votdDayKey(new Date("2026-10-01T18:00:00Z"))).toMatch(
+      /^\d{4}-\d{2}-\d{2}$/,
+    );
   });
 });
