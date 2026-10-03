@@ -9,6 +9,10 @@ import {
     type RefObject
 } from 'react';
 import type { DisplayStory } from '@/lib/display/items';
+import {
+    mergeStoriesForRotation,
+    storyKey
+} from '@/lib/display/rotation';
 import { fitDescriptionText } from '@/lib/display/truncate-description';
 import './display.css';
 
@@ -26,10 +30,6 @@ function formatRelativeTime(pubDate?: string): string {
     if (diffHr < 48) return `${diffHr} hr ago`;
     const diffDay = Math.round(diffHr / 24);
     return `${diffDay} day${diffDay === 1 ? '' : 's'} ago`;
-}
-
-function storyKey(story: DisplayStory): string {
-    return story.link ?? story.title;
 }
 
 /** Active slide plus neighbors for crossfade — not the full deck. */
@@ -185,10 +185,17 @@ export default function DisplayPlayer({
     const metaRef = useRef<HTMLDivElement>(null);
     const titleRef = useRef<HTMLHeadingElement>(null);
     const descriptionRef = useRef<HTMLParagraphElement>(null);
+    /** Keys shown in the current pass — soft refresh prefers unseen stories. */
+    const shownKeysRef = useRef<Set<string>>(new Set());
+    const playableRef = useRef(playable);
+    const indexRef = useRef(index);
+    playableRef.current = playable;
+    indexRef.current = index;
 
     useEffect(() => {
         setPlayable(initialStories);
-        setIndex(i => (initialStories.length ? Math.min(i, initialStories.length - 1) : 0));
+        setIndex(0);
+        shownKeysRef.current = new Set();
     }, [initialStories]);
 
     const activeStory = playable[index];
@@ -199,8 +206,17 @@ export default function DisplayPlayer({
     );
 
     const advance = useCallback(() => {
-        setIndex(i => (playable.length ? (i + 1) % playable.length : 0));
-    }, [playable.length]);
+        setIndex(i => {
+            const list = playableRef.current;
+            if (!list.length) return 0;
+            const current = list[i];
+            if (current) shownKeysRef.current.add(storyKey(current));
+            const next = (i + 1) % list.length;
+            // Finished a full pass through the current ordering.
+            if (next === 0) shownKeysRef.current = new Set();
+            return next;
+        });
+    }, []);
 
     useEffect(() => {
         if (playable.length <= 1) return;
@@ -293,8 +309,19 @@ export default function DisplayPlayer({
                 if (!res.ok) return;
                 const data = (await res.json()) as { stories?: DisplayStory[] };
                 if (!Array.isArray(data.stories) || data.stories.length === 0) return;
-                setPlayable(data.stories);
-                setIndex(i => Math.min(i, data.stories!.length - 1));
+
+                const list = playableRef.current;
+                const active = list[indexRef.current];
+                if (active) shownKeysRef.current.add(storyKey(active));
+
+                const merged = mergeStoriesForRotation(
+                    data.stories,
+                    shownKeysRef.current,
+                    active ? storyKey(active) : undefined
+                );
+                shownKeysRef.current = merged.shown;
+                setPlayable(merged.stories);
+                setIndex(merged.index);
             } catch {
                 /* ignore network blips on wall displays */
             }
