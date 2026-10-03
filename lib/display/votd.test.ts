@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
+  cleanVotdContent,
   decodeHtmlEntities,
   replicateStory,
+  stripVotdHtml,
   votdDayKey,
   votdToStory,
 } from "./votd";
@@ -20,6 +22,32 @@ describe("decodeHtmlEntities", () => {
   });
 });
 
+describe("stripVotdHtml", () => {
+  it("uppercases small-caps Lord and drops the span", () => {
+    expect(
+      stripVotdHtml(
+        'trusts in the <span class="small-caps" >Lord</span> is safe.',
+      ),
+    ).toBe("trusts in the LORD is safe.");
+  });
+
+  it("strips other tags without uppercasing", () => {
+    expect(stripVotdHtml("Blessed are <i>you</i>.")).toBe("Blessed are you.");
+  });
+});
+
+describe("cleanVotdContent", () => {
+  it("handles today's Proverbs verse with small-caps", () => {
+    expect(
+      cleanVotdContent(
+        'The fear of man lays a snare, but whoever trusts in the <span class="small-caps" >Lord</span> is safe.',
+      ),
+    ).toBe(
+      "The fear of man lays a snare, but whoever trusts in the LORD is safe.",
+    );
+  });
+});
+
 describe("votdToStory", () => {
   it("maps reference and cleaned content", () => {
     const story = votdToStory({
@@ -33,6 +61,18 @@ describe("votdToStory", () => {
       "\u201CBlessed are you when others revile you.\u201D",
     );
     expect(story?.source).toBe("Verse of the Day · ESV");
+  });
+
+  it("strips small-caps markup from content", () => {
+    const story = votdToStory({
+      content:
+        'whoever trusts in the <span class="small-caps" >Lord</span> is safe.',
+      display_ref: "Proverbs 29:25",
+      version_id: "ESV",
+    });
+    expect(story?.description).toBe(
+      "whoever trusts in the LORD is safe.",
+    );
   });
 });
 
@@ -52,9 +92,9 @@ describe("replicateStory", () => {
 });
 
 describe("votdDayKey", () => {
-  it("returns a YYYY-MM-DD string", () => {
-    expect(votdDayKey(new Date("2026-10-01T18:00:00Z"))).toMatch(
-      /^\d{4}-\d{2}-\d{2}$/,
-    );
+  it("returns the UTC calendar day", () => {
+    // Still evening Oct 2 in ET, already Oct 3 UTC.
+    expect(votdDayKey(new Date("2026-10-03T01:00:00Z"))).toBe("2026-10-03");
+    expect(votdDayKey(new Date("2026-10-02T23:59:59Z"))).toBe("2026-10-02");
   });
 });

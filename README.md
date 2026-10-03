@@ -60,16 +60,18 @@ Stories rotate every 14 seconds (change with `?seconds=5` through `120`). The pa
 | `transparent` | off | Transparent page background |
 | `align` | `left` | `right` for right-aligned text |
 | `catechism` | off | Interleave Baptist Catechism Q&As with news |
-| `catechismCount` | `10` | Random Q&As **added on top of** the full news pool |
+| `catechismCount` | `5` | Random Q&As **added on top of** the full news pool |
 | `catechismEvery` | `4` | Preferred spacing (falls back to even mix for large counts) |
+| `doctrine` | off | Mix in Daily Doctrine concept summaries |
+| `doctrineCount` | `5` | Random doctrine readings mixed into the pool |
 | `votd` | off | Mix in [Bible Gateway](https://www.biblegateway.com/votd/get/?format=json&version=ESV) Verse of the Day (ESV) |
 | `votdCount` | `10` | How many copies of today’s verse to insert (for frequency) |
 
-Example with catechism:
+Example with catechism + doctrine + VOTD:
 
-`/display?seconds=60&photos=true&progress=false&ios=true&catechism=true&votd=true`
+`/display?seconds=60&photos=true&progress=false&ios=true&catechism=true&doctrine=true&votd=true`
 
-When `catechism=true`, ~30 news stories stay in the rotation and ~10 random Q&As from [The Baptist Catechism](https://founders.org/library/the-baptist-catechism/) are mixed in. With `votd=true`, today’s ESV verse is also mixed in (10 copies by default). Only the active slide (plus neighbors) is mounted in the DOM; the rest are in the in-memory pool. The catechism random set reshuffles hourly.
+When `catechism=true`, ~30 news stories stay in the rotation and 5 random Q&As from [The Baptist Catechism](https://founders.org/library/the-baptist-catechism/) are mixed in (override with `catechismCount`). With `doctrine=true`, 5 random Daily Doctrine summaries are also mixed in. With `votd=true`, today’s ESV verse is mixed in (10 copies by default). Only the active slide (plus neighbors) is mounted in the DOM; the rest are in the in-memory pool. Catechism and doctrine picks reshuffle hourly.
 
 **Why does text still look cropped?** Content is limited in three places:
 

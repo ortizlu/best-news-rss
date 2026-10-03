@@ -54,6 +54,25 @@ export function decodeHtmlEntities(input: string): string {
   return out;
 }
 
+/**
+ * Gateway wraps the divine name in small-caps spans (and occasionally other
+ * tags). Display is plain text, so unwrap tags and use LORD for small-caps.
+ */
+export function stripVotdHtml(input: string): string {
+  let out = input.replace(
+    /<span\b[^>]*\bsmall-caps\b[^>]*>([\s\S]*?)<\/span>/gi,
+    (_, inner: string) => inner.replace(/<[^>]+>/g, "").toUpperCase(),
+  );
+  out = out.replace(/<br\s*\/?>/gi, " ");
+  out = out.replace(/<[^>]+>/g, "");
+  return out;
+}
+
+/** Entities → strip tags → collapse whitespace. */
+export function cleanVotdContent(input: string): string {
+  return decodeHtmlEntities(stripVotdHtml(input));
+}
+
 export function votdToStory(payload: VotdPayload["votd"]): DisplayStory | null {
   if (!payload) return null;
   const raw = payload.content || payload.text;
@@ -63,7 +82,7 @@ export function votdToStory(payload: VotdPayload["votd"]): DisplayStory | null {
   const version = payload.version_id || "ESV";
   return {
     title: ref,
-    description: decodeHtmlEntities(raw),
+    description: cleanVotdContent(raw),
     source: `Verse of the Day · ${version}`,
     imageUrl: VOTD_BACKGROUND_URL,
   };
@@ -89,14 +108,9 @@ type DayCache = {
 
 let dayCache: DayCache | null = null;
 
-/** YYYY-MM-DD in America/New_York — matches typical “verse of the day” rollover. */
+/** YYYY-MM-DD in UTC — matches Bible Gateway’s typical VOTD rollover. */
 export function votdDayKey(now = new Date()): string {
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: "America/New_York",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(now);
+  return now.toISOString().slice(0, 10);
 }
 
 async function fetchVerseOfTheDayUncached(): Promise<DisplayStory | null> {

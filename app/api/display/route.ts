@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { DEFAULT_CATECHISM_COUNT } from "@/lib/display/catechism";
+import { DEFAULT_DOCTRINE_COUNT } from "@/lib/display/doctrine";
 import { getDisplayStories } from "@/lib/display/items";
 import { DEFAULT_VOTD_COPIES } from "@/lib/display/votd";
 
@@ -25,6 +26,12 @@ export async function GET(request: NextRequest) {
     Number.isFinite(countRaw) && countRaw >= 1
       ? Math.min(114, Math.floor(countRaw))
       : DEFAULT_CATECHISM_COUNT;
+  const includeDoctrine = flag(request.nextUrl.searchParams.get("doctrine"));
+  const doctrineRaw = Number(request.nextUrl.searchParams.get("doctrineCount"));
+  const doctrineCount =
+    Number.isFinite(doctrineRaw) && doctrineRaw >= 1
+      ? Math.min(260, Math.floor(doctrineRaw))
+      : DEFAULT_DOCTRINE_COUNT;
   const includeVotd = flag(request.nextUrl.searchParams.get("votd"));
   const votdRaw = Number(request.nextUrl.searchParams.get("votdCount"));
   const votdCount =
@@ -38,6 +45,8 @@ export async function GET(request: NextRequest) {
       includeCatechism,
       catechismEvery,
       catechismCount,
+      includeDoctrine,
+      doctrineCount,
       includeVotd,
       votdCount,
     });

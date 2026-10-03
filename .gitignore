@@ -14,5 +14,7 @@ npm-debug.log*
 # vercel
 .vercel
 
+# copyrighted source text (summaries only are committed)
+data/private/
 
 .vscode/

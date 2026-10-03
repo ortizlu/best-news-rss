@@ -12,6 +12,12 @@ import {
   pickCatechismItems,
 } from "./catechism";
 import {
+  DEFAULT_DOCTRINE_COUNT,
+  doctrineToStory,
+  loadDoctrineItems,
+  pickDoctrineItems,
+} from "./doctrine";
+import {
   DEFAULT_VOTD_COPIES,
   fetchVerseOfTheDay,
   replicateStory,
@@ -32,8 +38,11 @@ export type GetDisplayStoriesOptions = {
   includeCatechism?: boolean;
   /** Insert cadence hint (default 4). Large catechism pools fall back to even mix. */
   catechismEvery?: number;
-  /** How many random Q&As to add on top of news (default 10). */
+  /** How many random Q&As to add on top of news (default 5). */
   catechismCount?: number;
+  includeDoctrine?: boolean;
+  /** How many random Daily Doctrine summaries to mix in (default 5). */
+  doctrineCount?: number;
   includeVotd?: boolean;
   /** How many copies of today's verse to mix in (default 10). */
   votdCount?: number;
@@ -52,6 +61,8 @@ export async function getDisplayStories(
     includeCatechism = false,
     catechismEvery = 4,
     catechismCount = DEFAULT_CATECHISM_COUNT,
+    includeDoctrine = false,
+    doctrineCount = DEFAULT_DOCTRINE_COUNT,
     includeVotd = false,
     votdCount = DEFAULT_VOTD_COPIES,
   }: GetDisplayStoriesOptions = {},
@@ -60,6 +71,10 @@ export async function getDisplayStories(
   const qCount = Math.max(
     0,
     Math.min(114, Math.floor(catechismCount) || DEFAULT_CATECHISM_COUNT),
+  );
+  const dCount = Math.max(
+    0,
+    Math.min(260, Math.floor(doctrineCount) || DEFAULT_DOCTRINE_COUNT),
   );
   const vCount = Math.max(
     0,
@@ -104,6 +119,12 @@ export async function getDisplayStories(
     const items = await loadCatechismItems();
     const picked = pickCatechismItems(items, qCount).map(catechismToStory);
     stories = interleaveCatechism(news, picked, every);
+  }
+
+  if (includeDoctrine && dCount > 0) {
+    const items = await loadDoctrineItems();
+    const picked = pickDoctrineItems(items, dCount).map(doctrineToStory);
+    stories = interleaveEvenly(stories, picked);
   }
 
   if (includeVotd && vCount > 0) {

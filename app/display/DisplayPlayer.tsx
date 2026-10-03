@@ -52,6 +52,8 @@ type Props = {
     includeCatechism?: boolean;
     catechismEvery?: number;
     catechismCount?: number;
+    includeDoctrine?: boolean;
+    doctrineCount?: number;
     includeVotd?: boolean;
     votdCount?: number;
 };
@@ -167,7 +169,9 @@ export default function DisplayPlayer({
     textAlign,
     includeCatechism = false,
     catechismEvery = 4,
-    catechismCount = 10,
+    catechismCount = 5,
+    includeDoctrine = false,
+    doctrineCount = 5,
     includeVotd = false,
     votdCount = 10
 }: Props) {
@@ -275,6 +279,10 @@ export default function DisplayPlayer({
                     params.set('catechismEvery', String(catechismEvery));
                     params.set('catechismCount', String(catechismCount));
                 }
+                if (includeDoctrine) {
+                    params.set('doctrine', '1');
+                    params.set('doctrineCount', String(doctrineCount));
+                }
                 if (includeVotd) {
                     params.set('votd', '1');
                     params.set('votdCount', String(votdCount));
@@ -294,7 +302,16 @@ export default function DisplayPlayer({
 
         const id = window.setInterval(refreshStories, STORY_REFRESH_MS);
         return () => clearInterval(id);
-    }, [showPhotos, includeCatechism, catechismEvery, catechismCount, includeVotd, votdCount]);
+    }, [
+        showPhotos,
+        includeCatechism,
+        catechismEvery,
+        catechismCount,
+        includeDoctrine,
+        doctrineCount,
+        includeVotd,
+        votdCount
+    ]);
 
     useEffect(() => {
         if (!transparent) return;

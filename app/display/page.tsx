@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { DEFAULT_CATECHISM_COUNT } from "@/lib/display/catechism";
+import { DEFAULT_DOCTRINE_COUNT } from "@/lib/display/doctrine";
 import { getDisplayStories } from "@/lib/display/items";
 import { DEFAULT_VOTD_COPIES } from "@/lib/display/votd";
 import DisplayPlayer from "./DisplayPlayer";
@@ -23,6 +24,8 @@ type PageProps = {
     catechism?: string;
     catechismEvery?: string;
     catechismCount?: string;
+    doctrine?: string;
+    doctrineCount?: string;
     votd?: string;
     votdCount?: string;
   }>;
@@ -52,6 +55,12 @@ function parseCatechismCount(value: string | undefined): number {
   return Math.min(114, Math.floor(n));
 }
 
+function parseDoctrineCount(value: string | undefined): number {
+  const n = Number(value);
+  if (!Number.isFinite(n) || n < 1) return DEFAULT_DOCTRINE_COUNT;
+  return Math.min(260, Math.floor(n));
+}
+
 function parseVotdCount(value: string | undefined): number {
   const n = Number(value);
   if (!Number.isFinite(n) || n < 1) return DEFAULT_VOTD_COPIES;
@@ -71,6 +80,8 @@ export default async function DisplayPage({ searchParams }: PageProps) {
   const includeCatechism = flag(params.catechism);
   const every = catechismEvery(params.catechismEvery);
   const count = parseCatechismCount(params.catechismCount);
+  const includeDoctrine = flag(params.doctrine);
+  const doctrineCopies = parseDoctrineCount(params.doctrineCount);
   const includeVotd = flag(params.votd);
   const votdCopies = parseVotdCount(params.votdCount);
 
@@ -79,6 +90,8 @@ export default async function DisplayPage({ searchParams }: PageProps) {
     includeCatechism,
     catechismEvery: every,
     catechismCount: count,
+    includeDoctrine,
+    doctrineCount: doctrineCopies,
     includeVotd,
     votdCount: votdCopies,
   });
@@ -95,6 +108,8 @@ export default async function DisplayPage({ searchParams }: PageProps) {
       includeCatechism={includeCatechism}
       catechismEvery={every}
       catechismCount={count}
+      includeDoctrine={includeDoctrine}
+      doctrineCount={doctrineCopies}
       includeVotd={includeVotd}
       votdCount={votdCopies}
     />
