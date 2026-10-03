@@ -57,9 +57,11 @@ export function decodeHtmlEntities(input: string): string {
 /**
  * Gateway wraps the divine name in small-caps spans (and occasionally other
  * tags). Display is plain text, so unwrap tags and use LORD for small-caps.
+ * ESV section headings arrive as <h3> and are not part of the verse.
  */
 export function stripVotdHtml(input: string): string {
-  let out = input.replace(
+  let out = input.replace(/<h[1-6]\b[^>]*>[\s\S]*?<\/h[1-6]>/gi, " ");
+  out = out.replace(
     /<span\b[^>]*\bsmall-caps\b[^>]*>([\s\S]*?)<\/span>/gi,
     (_, inner: string) => inner.replace(/<[^>]+>/g, "").toUpperCase(),
   );
@@ -68,9 +70,23 @@ export function stripVotdHtml(input: string): string {
   return out;
 }
 
-/** Entities → strip tags → collapse whitespace. */
+/**
+ * The `text` field renders the same heading as a leading [bracketed] phrase.
+ * Only strip it at the start so mid-verse ESV brackets survive.
+ */
+export function stripVerseHeading(input: string): string {
+  let out = input.replace(
+    /^(\s*[\u201C\u2018"']?)\s*\[[^\]]+\]\s*/,
+    (_, lead: string) => lead,
+  );
+  // Heading removal can leave a gap after the opening quote.
+  out = out.replace(/^([\u201C\u2018"'])\s+/, "$1");
+  return out.trim();
+}
+
+/** Entities → strip tags/headings → collapse whitespace. */
 export function cleanVotdContent(input: string): string {
-  return decodeHtmlEntities(stripVotdHtml(input));
+  return stripVerseHeading(decodeHtmlEntities(stripVotdHtml(input)));
 }
 
 export function votdToStory(payload: VotdPayload["votd"]): DisplayStory | null {

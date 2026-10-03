@@ -3,6 +3,7 @@ import {
   cleanVotdContent,
   decodeHtmlEntities,
   replicateStory,
+  stripVerseHeading,
   stripVotdHtml,
   votdDayKey,
   votdToStory,
@@ -34,10 +35,34 @@ describe("stripVotdHtml", () => {
   it("strips other tags without uppercasing", () => {
     expect(stripVotdHtml("Blessed are <i>you</i>.")).toBe("Blessed are you.");
   });
+
+  it("drops ESV section headings along with their text", () => {
+    expect(
+      stripVotdHtml(
+        "<h3>Born Again to a Living Hope</h3> Blessed be the God and Father",
+      ).trim(),
+    ).toBe("Blessed be the God and Father");
+  });
+});
+
+describe("stripVerseHeading", () => {
+  it("removes a bracketed heading after the opening quote", () => {
+    expect(
+      stripVerseHeading(
+        "\u201C[Born Again to a Living Hope]  Blessed be the God\u201D",
+      ),
+    ).toBe("\u201CBlessed be the God\u201D");
+  });
+
+  it("keeps brackets that appear mid-verse", () => {
+    expect(stripVerseHeading("Then he said [to them] go.")).toBe(
+      "Then he said [to them] go.",
+    );
+  });
 });
 
 describe("cleanVotdContent", () => {
-  it("handles today's Proverbs verse with small-caps", () => {
+  it("handles a verse with small-caps", () => {
     expect(
       cleanVotdContent(
         'The fear of man lays a snare, but whoever trusts in the <span class="small-caps" >Lord</span> is safe.',
@@ -45,6 +70,22 @@ describe("cleanVotdContent", () => {
     ).toBe(
       "The fear of man lays a snare, but whoever trusts in the LORD is safe.",
     );
+  });
+
+  it("drops the heading from the content field", () => {
+    expect(
+      cleanVotdContent(
+        "<h3>Born Again to a Living Hope</h3> Blessed be the God and Father of our Lord Jesus Christ!",
+      ),
+    ).toBe("Blessed be the God and Father of our Lord Jesus Christ!");
+  });
+
+  it("drops the heading from the text field fallback", () => {
+    expect(
+      cleanVotdContent(
+        "&ldquo;[Born Again to a Living Hope]  Blessed be the God and Father!&rdquo;",
+      ),
+    ).toBe("\u201CBlessed be the God and Father!\u201D");
   });
 });
 
