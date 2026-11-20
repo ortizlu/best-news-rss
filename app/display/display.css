@@ -69,7 +69,7 @@ img.display-bg {
 .display-overlay {
     position: absolute;
     inset: 0;
-    background: rgba(8, 10, 14, 0.35);
+    background: rgba(8, 10, 14, 0.45);
 }
 
 .display-content {
@@ -278,13 +278,13 @@ img.display-bg {
 .display-page--ios .display-overlay--frost {
     /* Frost sheen + darker center band for centered text on bright photos. */
     background:
-        linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 34%),
+        linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, transparent 34%),
         linear-gradient(
             180deg,
-            rgba(10, 12, 18, 0.32) 0%,
-            rgba(10, 12, 18, 0.5) 34%,
-            rgba(10, 12, 18, 0.62) 68%,
-            rgba(10, 12, 18, 0.72) 100%
+            rgba(10, 12, 18, 0.46) 0%,
+            rgba(10, 12, 18, 0.64) 34%,
+            rgba(10, 12, 18, 0.76) 68%,
+            rgba(10, 12, 18, 0.86) 100%
         );
 }
 
