@@ -127,9 +127,12 @@ img.display-bg {
 }
 
 .display-title {
+    --title-lines: 2;
+    --title-line-height: 1.12;
+
     font-size: clamp(24px, 22cqh, 54px);
     font-weight: 700;
-    line-height: 1.12;
+    line-height: var(--title-line-height);
     margin: 0 0 1.8cqh;
     letter-spacing: -0.035em;
     text-shadow: 0 2px 16px rgba(0, 0, 0, 0.65);
@@ -137,7 +140,10 @@ img.display-bg {
     flex-shrink: 0;
     display: -webkit-box;
     -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: var(--title-lines);
+    /* Pins the box to a whole number of lines; without it the clamped box can
+       be a fraction taller and leak the tops of the next line. */
+    max-height: calc(var(--title-lines) * var(--title-line-height) * 1em);
     overflow: hidden;
 }
 
@@ -181,7 +187,7 @@ img.display-bg {
 /* Wide, short Dakboard strip */
 @container (min-aspect-ratio: 1.35) {
     .display-title {
-        -webkit-line-clamp: 2;
+        --title-lines: 2;
         font-size: clamp(24px, 22cqh, 52px);
         padding-bottom: 3.6cqh;
         padding-top: 1cqh;
@@ -193,10 +199,11 @@ img.display-bg {
     }
 }
 
-/* Tall, narrow column — headlines get room instead of clipping at two lines */
+/* Tall, narrow column — the headline takes as many lines as it needs and the
+   description, which is the flexible child, gives up the space. */
 @container (max-aspect-ratio: 1) {
     .display-title {
-        -webkit-line-clamp: 4;
+        --title-lines: 7;
         padding-bottom: 1cqh;
     }
 }
@@ -204,7 +211,7 @@ img.display-bg {
 /* Very short displays */
 @container (max-height: 160px) {
     .display-title {
-        -webkit-line-clamp: 2;
+        --title-lines: 2;
         font-size: clamp(20px, 21cqh, 40px);
         padding-bottom: 2.6cqh;
         padding-top: 0.5cqh;
