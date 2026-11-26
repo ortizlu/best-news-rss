@@ -335,6 +335,7 @@ img.display-bg {
 .display-page--ios,
 .display-page--ios.display-page--has-photos {
     background: rgba(22, 22, 24, 0.72);
+    border: none;
     border-radius: 40px;
     overflow: hidden;
     backdrop-filter: none;
