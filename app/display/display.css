@@ -361,8 +361,8 @@ img.display-bg {
     align-items: center !important;
     justify-content: flex-start !important;
     gap: 12vh;
-    /* 16vh of stacked padding measured ~18px. 12/18 of that matches the album. */
-    padding: 8vh 5vh 8vh 10.7vh;
+    /* 10.7vh measured ~12px. 12.5vh adds about 2px. */
+    padding: 8vh 5vh 8vh 12.5vh;
 }
 
 .display-page .display-article-link,
