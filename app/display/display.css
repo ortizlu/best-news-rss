@@ -371,7 +371,7 @@ img.display-bg {
     width: 78vh;
     height: 78vh;
     flex: 0 0 78vh;
-    border-radius: 16px;
+    border-radius: calc(78vh * 0.16 / 0.66);
     border: 1px solid rgba(255, 255, 255, 0.16);
     box-sizing: border-box;
     object-fit: cover;
