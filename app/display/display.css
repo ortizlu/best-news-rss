@@ -1,5 +1,5 @@
-/* The Dakboard block supplies the glass. This document has to stay clear
-   or the iframe paints a black page over it. */
+/* Keep the document clear so the wallpaper shows through, and tint the
+   page itself with the same glass gray as the other cards. */
 html,
 body,
 html.display-transparent,
@@ -339,7 +339,7 @@ img.display-bg {
 .display-page,
 .display-page--ios,
 .display-page--ios.display-page--has-photos {
-    background: transparent;
+    background: rgba(22, 22, 24, 0.52);
     border: none;
     border-radius: 40px;
     overflow: hidden;
@@ -362,7 +362,7 @@ img.display-bg {
     flex-direction: row !important;
     align-items: center !important;
     justify-content: flex-start !important;
-    gap: 4vh;
+    gap: 8vh;
     padding: 8vh 4vh;
 }
 
