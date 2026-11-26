@@ -75,9 +75,20 @@ export function lastVisibleLineIsPartial(el: HTMLElement): boolean {
   return box.bottom > rect.bottom + 1;
 }
 
+function isMultiColumn(el: HTMLElement): boolean {
+  const count = getComputedStyle(el).columnCount;
+  return count !== "auto" && Number(count) > 1;
+}
+
+/** Single-column text overflows downward. Two columns overflow sideways. */
+function overflows(el: HTMLElement): boolean {
+  if (isMultiColumn(el)) return el.scrollWidth > el.clientWidth + 2;
+  return el.scrollHeight > el.clientHeight + 2;
+}
+
 function fitsInBox(el: HTMLElement, text: string): boolean {
   el.textContent = text;
-  return el.scrollHeight <= el.clientHeight + 2;
+  return !overflows(el);
 }
 
 function trimWordBoundary(text: string): string {
@@ -138,8 +149,8 @@ function truncateToCleanEnd(el: HTMLElement, fullText: string): string {
   while (lo <= hi) {
     const mid = Math.floor((lo + hi) / 2);
     el.textContent = fullText.slice(0, mid);
-    const fits = el.scrollHeight <= el.clientHeight + 2;
-    const partial = fits && lastVisibleLineIsPartial(el);
+    const fits = !overflows(el);
+    const partial = fits && !isMultiColumn(el) && lastVisibleLineIsPartial(el);
 
     if (fits && !partial) {
       best = mid;
@@ -213,7 +224,7 @@ export function fitDescriptionText(
   applyMeasureHeight(desc, available);
 
   desc.textContent = fullText;
-  if (desc.scrollHeight <= desc.clientHeight + 2) {
+  if (!overflows(desc)) {
     return fullText;
   }
 
@@ -227,8 +238,12 @@ export function fitDescriptionText(
   const firstPara = splitParagraphs(fullText)[0] ?? fullText;
 
   desc.textContent = firstPara;
-  if (desc.scrollHeight <= desc.clientHeight + 2) {
+  if (!overflows(desc)) {
     return firstPara;
+  }
+
+  if (isMultiColumn(desc)) {
+    return truncateWithEllipsis(desc, firstPara);
   }
 
   if (!lastVisibleLineIsPartial(desc)) {
