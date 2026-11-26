@@ -363,7 +363,7 @@ img.display-bg {
     align-items: center !important;
     justify-content: flex-start !important;
     gap: 12vh;
-    padding: 8vh 5vh;
+    padding: 8vh 5vh 8vh 14vh;
 }
 
 .display-thumb {
