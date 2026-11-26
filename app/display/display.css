@@ -362,8 +362,8 @@ img.display-bg {
     flex-direction: row !important;
     align-items: center !important;
     justify-content: flex-start !important;
-    gap: 8vh;
-    padding: 8vh 4vh;
+    gap: 12vh;
+    padding: 8vh 5vh;
 }
 
 .display-thumb {
