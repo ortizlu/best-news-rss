@@ -425,20 +425,15 @@ img.display-bg {
 
 .display-page .display-description,
 .display-page--ios .display-description {
-    display: block;
-    -webkit-line-clamp: unset;
-    column-count: 2;
-    column-gap: 3.5vh;
-    column-fill: auto;
-    -webkit-column-fill: auto;
-    orphans: 1;
-    widows: 1;
-    /* height: 0 lets the flex row supply a real height, so the left
-       column fills top to bottom before the right column starts. */
-    flex: 1 1 auto;
-    height: 0;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    column-count: auto;
+    width: 100%;
+    flex: 0 1 auto;
+    height: auto;
     min-height: 0;
-    max-height: none !important;
+    max-height: calc(1.3em * 2);
     margin: 1.4vh 0 0;
     padding: 0;
     overflow: hidden;
@@ -447,5 +442,5 @@ img.display-bg {
     line-height: 1.3;
     color: #fff;
     text-shadow: none;
-    white-space: pre-line;
+    white-space: normal;
 }
