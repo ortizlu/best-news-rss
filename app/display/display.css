@@ -356,14 +356,23 @@ img.display-bg {
 }
 
 .display-page .display-content,
-.display-page--ios .display-content,
+.display-page--ios .display-content {
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 12vh;
+    /* 16vh of stacked padding measured ~18px. 12/18 of that matches the album. */
+    padding: 8vh 5vh 8vh 10.7vh;
+}
+
 .display-page .display-article-link,
 .display-page--ios .display-article-link {
     flex-direction: row !important;
     align-items: center !important;
     justify-content: flex-start !important;
     gap: 12vh;
-    padding: 8vh 5vh 8vh 8vh;
+    padding: 0;
+    box-sizing: border-box;
 }
 
 .display-thumb {
