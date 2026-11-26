@@ -1,6 +1,11 @@
+/* The Dakboard block supplies the glass. This document has to stay clear
+   or the iframe paints a black page over it. */
+html,
+body,
 html.display-transparent,
 body.display-transparent {
     background: transparent !important;
+    color-scheme: normal;
 }
 
 /* Text-first layout: left-aligned copy, image only as a dim backdrop. */
@@ -334,7 +339,7 @@ img.display-bg {
 .display-page,
 .display-page--ios,
 .display-page--ios.display-page--has-photos {
-    background: rgba(22, 22, 24, 0.72);
+    background: transparent;
     border: none;
     border-radius: 40px;
     overflow: hidden;
