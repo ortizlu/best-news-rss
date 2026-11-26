@@ -232,7 +232,8 @@ img.display-bg {
 .display-page--ios {
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
     background: transparent;
-    border-radius: 26px;
+    border-radius: 40px;
+    overflow: hidden;
     border: 1px solid rgba(255, 255, 255, 0.08);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
@@ -252,7 +253,7 @@ img.display-bg {
 }
 
 .display-page--ios .display-slide {
-    border-radius: 22px;
+    border-radius: 40px;
     overflow: hidden;
 }
 
@@ -328,16 +329,28 @@ img.display-bg {
 }
 
 /* Wide board bar: square photo on the left, like the album art, headline beside it.
-   Any wide block qualifies. The old cap (max-height: 480px) missed the
-   Dakboard design canvas, so the story kept filling the card. */
+   Uses the iframe window, which is the Dakboard block. A container query on
+   .display-page never fired there, so ios=true kept the full-bleed photo. */
 .display-thumb {
     display: none;
 }
 
-@container (min-aspect-ratio: 1.4) {
+@media (min-aspect-ratio: 1.4) {
+    .display-page,
+    .display-page--ios,
+    .display-page--ios.display-page--has-photos {
+        background: rgba(22, 22, 24, 0.72);
+        border-radius: 40px;
+        overflow: hidden;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+    }
+
     .display-page .display-bg,
     .display-page .display-overlay,
-    .display-page .display-progress {
+    .display-page .display-progress,
+    .display-page--ios .display-bg,
+    .display-page--ios .display-overlay {
         display: none !important;
     }
 
@@ -346,15 +359,15 @@ img.display-bg {
         flex-direction: row;
         align-items: center;
         justify-content: flex-start;
-        gap: 4cqh;
-        padding: 8cqh 5cqh;
+        gap: 4vh;
+        padding: 8vh 4vh;
     }
 
     .display-thumb {
         display: block;
-        width: 84cqh;
-        height: 84cqh;
-        flex: 0 0 84cqh;
+        width: 78vh;
+        height: 78vh;
+        flex: 0 0 78vh;
         border-radius: 16px;
         object-fit: cover;
         background: #2a2a2c;
@@ -369,7 +382,7 @@ img.display-bg {
     }
 
     .display-page .display-meta {
-        font-size: 11cqh;
+        font-size: 11vh;
         font-weight: 650;
         letter-spacing: 0.06em;
         text-transform: uppercase;
@@ -382,10 +395,10 @@ img.display-bg {
     .display-page .display-title {
         --title-lines: 2;
         --title-line-height: 1.2;
-        font-size: 20cqh;
+        font-size: 18vh;
         font-weight: 650;
         letter-spacing: -0.03em;
-        margin: 0.4cqh 0 0;
+        margin: 0.6vh 0 0;
         padding: 0;
         text-shadow: none;
     }
@@ -395,10 +408,10 @@ img.display-bg {
         -webkit-box-orient: vertical;
         -webkit-line-clamp: 1;
         max-height: 1.3em !important;
-        margin: 0.6cqh 0 0;
+        margin: 0.8vh 0 0;
         padding: 0;
         flex: 0 0 auto;
-        font-size: 14cqh;
+        font-size: 13vh;
         font-weight: 400;
         line-height: 1.3;
         color: rgba(255, 255, 255, 0.62);
