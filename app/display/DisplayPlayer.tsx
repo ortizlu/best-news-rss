@@ -434,15 +434,17 @@ export default function DisplayPlayer({
                                     />
                                 </a>
                             ) : (
-                                <StoryThumb story={story} show={showImage} />
-                                <StoryText
-                                    story={story}
-                                    descriptionText={isActive ? descriptionText : story.description}
-                                    textStackRef={isActive ? textStackRef : undefined}
-                                    metaRef={isActive ? metaRef : undefined}
-                                    titleRef={isActive ? titleRef : undefined}
-                                    descriptionRef={isActive ? descriptionRef : undefined}
-                                />
+                                <>
+                                    <StoryThumb story={story} show={showImage} />
+                                    <StoryText
+                                        story={story}
+                                        descriptionText={isActive ? descriptionText : story.description}
+                                        textStackRef={isActive ? textStackRef : undefined}
+                                        metaRef={isActive ? metaRef : undefined}
+                                        titleRef={isActive ? titleRef : undefined}
+                                        descriptionRef={isActive ? descriptionRef : undefined}
+                                    />
+                                </>
                             )}
                         </div>
                     </article>
