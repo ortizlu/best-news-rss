@@ -3,6 +3,7 @@
 import {
     useCallback,
     useEffect,
+    useLayoutEffect,
     useMemo,
     useRef,
     useState,
@@ -253,14 +254,12 @@ export default function DisplayPlayer({
         setProgress(0);
     }, [index, showProgress]);
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         const full = activeStory?.description;
         if (!full) {
             setDescriptionText(undefined);
             return;
         }
-
-        setDescriptionText(undefined);
 
         const container = contentRef.current;
         const stack = textStackRef.current;
@@ -275,7 +274,6 @@ export default function DisplayPlayer({
         };
 
         measure();
-        const raf = requestAnimationFrame(measure);
         const ro = new ResizeObserver(measure);
         ro.observe(container);
         ro.observe(stack);
@@ -283,7 +281,6 @@ export default function DisplayPlayer({
         if (title) ro.observe(title);
         window.addEventListener('resize', measure);
         return () => {
-            cancelAnimationFrame(raf);
             ro.disconnect();
             window.removeEventListener('resize', measure);
         };

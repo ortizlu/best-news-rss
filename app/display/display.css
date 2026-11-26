@@ -430,7 +430,13 @@ img.display-bg {
     column-count: 2;
     column-gap: 3.5vh;
     column-fill: auto;
-    flex: 1 1 0;
+    -webkit-column-fill: auto;
+    orphans: 1;
+    widows: 1;
+    /* height: 0 lets the flex row supply a real height, so the left
+       column fills top to bottom before the right column starts. */
+    flex: 1 1 auto;
+    height: 0;
     min-height: 0;
     max-height: none !important;
     margin: 1.4vh 0 0;
