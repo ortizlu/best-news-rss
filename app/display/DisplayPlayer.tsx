@@ -67,6 +67,13 @@ type StoryTextProps = {
     descriptionRef?: RefObject<HTMLParagraphElement | null>;
 };
 
+function StoryThumb({ story, show }: { story: DisplayStory; show: boolean }) {
+    if (!show || !story.imageUrl) return null;
+    return (
+        <img className="display-thumb" src={story.imageUrl} alt="" decoding="async" />
+    );
+}
+
 function StoryText({
     story,
     descriptionText,
@@ -414,6 +421,7 @@ export default function DisplayPlayer({
                                     rel="noopener noreferrer"
                                     aria-label={`Read article: ${story.title}`}
                                 >
+                                    <StoryThumb story={story} show={showImage} />
                                     <StoryText
                                         story={story}
                                         descriptionText={
@@ -426,6 +434,7 @@ export default function DisplayPlayer({
                                     />
                                 </a>
                             ) : (
+                                <StoryThumb story={story} show={showImage} />
                                 <StoryText
                                     story={story}
                                     descriptionText={isActive ? descriptionText : story.description}
