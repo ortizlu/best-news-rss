@@ -445,8 +445,15 @@ img.display-bg {
     white-space: normal;
 }
 
-/* Wider card means the player is hidden. */
+/* Wider card means the player is hidden. Let the text use the card
+   height instead of stopping even with the photo, so a second
+   description line fits at 17vh. */
 @media (min-aspect-ratio: 6 / 1) {
+    .display-page .display-text-stack {
+        height: auto;
+        align-self: stretch;
+    }
+
     .display-page .display-description,
     .display-page--ios .display-description {
         font-size: 17vh;
