@@ -444,3 +444,11 @@ img.display-bg {
     text-shadow: none;
     white-space: normal;
 }
+
+/* Wider card means the player is hidden. */
+@media (min-aspect-ratio: 6 / 1) {
+    .display-page .display-description,
+    .display-page--ios .display-description {
+        font-size: 17vh;
+    }
+}
