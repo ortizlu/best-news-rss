@@ -444,14 +444,3 @@ img.display-bg {
     text-shadow: none;
     white-space: normal;
 }
-
-/* The news card grows into the player when nothing is playing, so the
-   iframe gets wider. Use that extra width for a larger one-line description. */
-@media (min-aspect-ratio: 6 / 1) {
-    .display-page .display-description,
-    .display-page--ios .display-description {
-        -webkit-line-clamp: 1;
-        max-height: 1.3em !important;
-        font-size: 16vh;
-    }
-}
