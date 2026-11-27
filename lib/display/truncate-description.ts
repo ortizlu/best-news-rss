@@ -201,9 +201,7 @@ function truncateWithEllipsis(el: HTMLElement, fullText: string): string {
     result =
       best > 0
         ? fullText.slice(0, best).trimEnd() + ELLIPSIS
-        : fitsInBox(el, fullText)
-          ? fullText
-          : fullText.slice(0, 120).trimEnd() + ELLIPSIS;
+        : fullText;
   }
 
   return dropPartialNextParagraph(result, fullText);
